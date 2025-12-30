@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Œuvre - Les Yeux de Mona</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .oeuvre-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .oeuvre-header {
+            margin-bottom: 3rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--color-accent);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            transition: var(--transition);
+        }
+        
+        .back-link:hover {
+            color: var(--color-accent-light);
+        }
+        
+        .oeuvre-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .oeuvre-image-container {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+        
+        .oeuvre-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .oeuvre-details {
+            background: var(--color-surface);
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .oeuvre-title {
+            font-size: 2rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            color: var(--color-accent);
+            line-height: 1.3;
+        }
+        
+        .oeuvre-artist {
+            font-size: 1.3rem;
+            color: var(--color-text-light);
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+        
+        .oeuvre-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meta-label {
+            font-size: 0.85rem;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+        
+        .meta-value {
+            font-size: 1rem;
+            color: var(--color-text);
+        }
+        
+        .oeuvre-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--color-accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        
+        .oeuvre-link:hover {
+            background: var(--color-accent-light);
+        }
+        
+        .techniques-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .techniques-label {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .techniques-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .technique-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--color-text);
+            transition: var(--transition);
+        }
+        
+        .technique-badge:hover {
+            background: var(--color-hover);
+            border-color: var(--color-accent);
+        }
+        
+        .explanations {
+            margin-top: 3rem;
+        }
+        
+        .explanation-section {
+            background: var(--color-surface);
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+        }
+        
+        .explanation-title {
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: var(--color-accent);
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+        
+        .explanation-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--color-text);
+            white-space: pre-line;
+        }
+        
+        .navigation-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .nav-link {
+            padding: 1rem 2rem;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            text-decoration: none;
+            color: var(--color-text);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-link:hover {
+            background: var(--color-hover);
+            border-color: var(--color-accent);
+        }
+        
+        .nav-link.prev {
+            margin-right: auto;
+        }
+        
+        .nav-link.next {
+            margin-left: auto;
+        }
+        
+        .fullscreen-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        
+        .fullscreen-modal.active {
+            display: flex;
+        }
+        
+        /* Styles when in native fullscreen */
+        .fullscreen-modal:fullscreen {
+            display: flex;
+            background: rgba(0, 0, 0, 1);
+            padding: 2rem;
+        }
+        
+        .fullscreen-modal:-webkit-full-screen {
+            display: flex;
+            background: rgba(0, 0, 0, 1);
+            padding: 2rem;
+        }
+        
+        .fullscreen-modal:-moz-full-screen {
+            display: flex;
+            background: rgba(0, 0, 0, 1);
+            padding: 2rem;
+        }
+        
+        .fullscreen-modal:-ms-fullscreen {
+            display: flex;
+            background: rgba(0, 0, 0, 1);
+            padding: 2rem;
+        }
+        
+        .fullscreen-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            transform-origin: center center;
+            transition: transform 0.1s ease-out;
+            cursor: move;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+        
+        .fullscreen-image.zoomed {
+            cursor: grab;
+            image-rendering: auto;
+        }
+        
+        .fullscreen-image.zoomed:active {
+            cursor: grabbing;
+        }
+        
+        .fullscreen-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .fullscreen-canvas {
+            display: none;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            transform-origin: center center;
+            transition: opacity 0.3s ease-in-out;
+            cursor: move;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+        
+        .fullscreen-canvas.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        .fullscreen-image.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .fullscreen-image {
+            transition: opacity 0.3s ease-in-out;
+            position: relative;
+        }
+        
+        .zoom-overlay {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10001;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .zoom-overlay.visible {
+            opacity: 1;
+        }
+        
+        .zoom-level {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .zoom-technique {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            padding-left: 1rem;
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .thumbnail-overlay {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            width: 200px;
+            height: auto;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 8px;
+            padding: 0.5rem;
+            z-index: 10001;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .thumbnail-overlay.visible {
+            opacity: 1;
+        }
+        
+        .thumbnail-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%; /* Square aspect ratio */
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .thumbnail-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0.6;
+        }
+        
+        .thumbnail-viewport {
+            position: absolute;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            transition: all 0.1s ease-out;
+        }
+        
+        .fullscreen-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .fullscreen-close:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: scale(1.1);
+        }
+        
+        .oeuvre-image {
+            cursor: pointer;
+        }
+        
+        .oeuvre-image:hover {
+            opacity: 0.95;
+        }
+        
+        @media (max-width: 968px) {
+            .oeuvre-main {
+                grid-template-columns: 1fr;
+            }
+            
+            .oeuvre-image-container {
+                position: static;
+            }
+            
+            .fullscreen-close {
+                top: 1rem;
+                right: 1rem;
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="site-title">Les Yeux de Mona</h1>
+            <p class="site-subtitle">Exploration des œuvres citées par Thomas Schlesser</p>
+        </div>
+    </header>
+
+    <main class="oeuvre-page">
+        <a href="index.html" class="back-link">← Retour à la galerie</a>
+        
+        <div id="oeuvre-content">
+            <div class="loading">Chargement de l'œuvre...</div>
+        </div>
+    </main>
+    
+    <!-- Fullscreen modal -->
+    <div id="fullscreen-modal" class="fullscreen-modal">
+        <span class="fullscreen-close" aria-label="Fermer">&times;</span>
+        <div class="fullscreen-image-wrapper">
+            <img id="fullscreen-image" class="fullscreen-image" src="" alt="">
+            <canvas id="fullscreen-canvas" class="fullscreen-canvas"></canvas>
+        </div>
+        <div id="zoom-overlay" class="zoom-overlay">
+            <span class="zoom-level" id="zoom-level">x1.0</span>
+            <span class="zoom-technique" id="zoom-technique">Image normale</span>
+        </div>
+        <div id="thumbnail-overlay" class="thumbnail-overlay">
+            <div class="thumbnail-container">
+                <img id="thumbnail-image" class="thumbnail-image" src="" alt="">
+                <div id="thumbnail-viewport" class="thumbnail-viewport"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Collection basée sur le livre "Les Yeux de Mona" de Thomas Schlesser</p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script>
+        // Get artwork ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const artworkId = urlParams.get('id');
+        
+        // Function to render artwork page
+        function renderArtworkPage() {
+            // Find artwork
+            const artwork = allArtworks.find(a => a.id === artworkId);
+            
+            if (artwork) {
+                // Find previous and next artworks
+                const currentIndex = allArtworks.findIndex(a => a.id === artworkId);
+                const prevArtwork = currentIndex > 0 ? allArtworks[currentIndex - 1] : null;
+                const nextArtwork = currentIndex < allArtworks.length - 1 ? allArtworks[currentIndex + 1] : null;
+                
+                // Render artwork page
+                document.getElementById('oeuvre-content').innerHTML = `
+                <div class="oeuvre-header">
+                    <h2 class="oeuvre-title">${artwork.titre}</h2>
+                    <p class="oeuvre-artist">${artwork.artiste}</p>
+                </div>
+                
+                <div class="oeuvre-main">
+                    <div class="oeuvre-image-container">
+                        <img src="../${artwork.image_hd_local}" alt="${artwork.titre}" class="oeuvre-image" data-fullscreen-src="../${artwork.image_hd_local}">
+                    </div>
+                    
+                    <div class="oeuvre-details">
+                        <div class="oeuvre-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">Date</span>
+                                <span class="meta-value">${artwork.date}</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Musée</span>
+                                <span class="meta-value">${artwork.musee}</span>
+                            </div>
+                        </div>
+                        
+                        ${artwork.techniques && artwork.techniques.length > 0 ? `
+                        <div class="techniques-section">
+                            <div class="techniques-label">Techniques artistiques</div>
+                            <div class="techniques-list">
+                                ${artwork.techniques.map(technique => `
+                                    <span class="technique-badge">${technique}</span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${artwork.lien ? `<a href="${artwork.lien}" target="_blank" class="oeuvre-link">Voir sur le site du musée →</a>` : ''}
+                    </div>
+                </div>
+                
+                <div class="explanations">
+                    ${artwork.comment_comprendre ? `
+                        <div class="explanation-section">
+                            <h3 class="explanation-title">Comment comprendre cette œuvre</h3>
+                            <div class="explanation-content">${artwork.comment_comprendre}</div>
+                        </div>
+                    ` : ''}
+                    
+                    ${artwork.ce_quil_faut_voir ? `
+                        <div class="explanation-section">
+                            <h3 class="explanation-title">Ce qu'il faut voir</h3>
+                            <div class="explanation-content">${artwork.ce_quil_faut_voir}</div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="navigation-links">
+                    ${prevArtwork ? `
+                        <a href="oeuvre.html?id=${prevArtwork.id}" class="nav-link prev">
+                            ← ${prevArtwork.titre}
+                        </a>
+                    ` : '<div></div>'}
+                    
+                    ${nextArtwork ? `
+                        <a href="oeuvre.html?id=${nextArtwork.id}" class="nav-link next">
+                            ${nextArtwork.titre} →
+                        </a>
+                    ` : ''}
+                </div>
+            `;
+            } else {
+                document.getElementById('oeuvre-content').innerHTML = `
+                    <div class="empty-state">
+                        <h2>Œuvre non trouvée</h2>
+                        <p><a href="index.html">Retour à la galerie</a></p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Fullscreen modal functionality
+        const fullscreenModal = document.getElementById('fullscreen-modal');
+        const fullscreenImage = document.getElementById('fullscreen-image');
+        const fullscreenCanvas = document.getElementById('fullscreen-canvas');
+        const fullscreenClose = document.querySelector('.fullscreen-close');
+        const zoomOverlay = document.getElementById('zoom-overlay');
+        const zoomLevelDisplay = document.getElementById('zoom-level');
+        const zoomTechniqueDisplay = document.getElementById('zoom-technique');
+        const thumbnailOverlay = document.getElementById('thumbnail-overlay');
+        const thumbnailImage = document.getElementById('thumbnail-image');
+        const thumbnailViewport = document.getElementById('thumbnail-viewport');
+        
+        let currentZoom = 1;
+        let currentPanX = 0;
+        let currentPanY = 0;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let originalImageSrc = '';
+        let canvasContext = null;
+        let useCanvas = false;
+        let canvasPreloaded = false;
+        let isProcessingCanvas = false;
+        const ZOOM_THRESHOLD_FOR_UPSCALE = 2.0; // Seuil de zoom pour activer le rééchantillonnage
+        
+        function upscaleImageWithCanvas(img, targetWidth, targetHeight) {
+            // Initialize canvas context if needed
+            if (!canvasContext) {
+                canvasContext = fullscreenCanvas.getContext('2d', { 
+                    willReadFrequently: true
+                });
+            }
+            
+            // Increase max dimension for better quality at high zoom
+            const maxDimension = 8192; // Increased for better quality
+            const aspectRatio = img.naturalWidth / img.naturalHeight;
+            let finalWidth = targetWidth;
+            let finalHeight = targetHeight;
+            
+            if (finalWidth > maxDimension || finalHeight > maxDimension) {
+                if (finalWidth > finalHeight) {
+                    finalWidth = maxDimension;
+                    finalHeight = Math.floor(maxDimension / aspectRatio);
+                } else {
+                    finalHeight = maxDimension;
+                    finalWidth = Math.floor(maxDimension * aspectRatio);
+                }
+            }
+            
+            // Set canvas size
+            fullscreenCanvas.width = finalWidth;
+            fullscreenCanvas.height = finalHeight;
+            
+            // Use high-quality image smoothing (bicubic interpolation)
+            canvasContext.imageSmoothingEnabled = true;
+            canvasContext.imageSmoothingQuality = 'high';
+            
+            // Multi-step upscaling for better quality (upscale in steps)
+            const steps = Math.ceil(Math.log2(Math.max(finalWidth / img.naturalWidth, finalHeight / img.naturalHeight)));
+            let currentWidth = img.naturalWidth;
+            let currentHeight = img.naturalHeight;
+            let tempCanvas = document.createElement('canvas');
+            let tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+            tempCtx.imageSmoothingEnabled = true;
+            tempCtx.imageSmoothingQuality = 'high';
+            
+            // Progressive upscaling in steps of 2x
+            for (let step = 0; step < steps; step++) {
+                const nextWidth = Math.min(finalWidth, currentWidth * 2);
+                const nextHeight = Math.min(finalHeight, currentHeight * 2);
+                
+                tempCanvas.width = nextWidth;
+                tempCanvas.height = nextHeight;
+                
+                if (step === 0) {
+                    // First step: draw original image
+                    tempCtx.drawImage(img, 0, 0, nextWidth, nextHeight);
+                } else {
+                    // Subsequent steps: draw from previous canvas
+                    tempCtx.drawImage(tempCanvas, 0, 0, currentWidth, currentHeight, 0, 0, nextWidth, nextHeight);
+                }
+                
+                currentWidth = nextWidth;
+                currentHeight = nextHeight;
+            }
+            
+            // Draw final upscaled image to main canvas
+            canvasContext.drawImage(tempCanvas, 0, 0, finalWidth, finalHeight);
+            
+            // Apply aggressive sharpening filter to enhance details
+            try {
+                const imageData = canvasContext.getImageData(0, 0, finalWidth, finalHeight);
+                const data = imageData.data;
+                const width = finalWidth;
+                const height = finalHeight;
+                
+                // Create a copy for processing
+                const processedData = new Uint8ClampedArray(data);
+                
+                // Apply enhanced unsharp mask with Laplacian sharpening
+                // Using a stronger kernel for better edge detection
+                for (let y = 2; y < height - 2; y += 1) {
+                    for (let x = 2; x < width - 2; x += 1) {
+                        const idx = (y * width + x) * 4;
+                        
+                        // Laplacian kernel for edge detection (stronger sharpening)
+                        // Kernel: [0, -1, 0; -1, 5, -1; 0, -1, 0]
+                        let sharpR = data[idx] * 5;
+                        let sharpG = data[idx + 1] * 5;
+                        let sharpB = data[idx + 2] * 5;
+                        
+                        // Subtract neighbors
+                        const neighbors = [
+                            ((y - 1) * width + x) * 4,     // top
+                            ((y + 1) * width + x) * 4,     // bottom
+                            (y * width + (x - 1)) * 4,     // left
+                            (y * width + (x + 1)) * 4      // right
+                        ];
+                        
+                        neighbors.forEach(nIdx => {
+                            sharpR -= data[nIdx];
+                            sharpG -= data[nIdx + 1];
+                            sharpB -= data[nIdx + 2];
+                        });
+                        
+                        // Apply with adaptive strength based on zoom level - more aggressive
+                        const zoomLevel = Math.max(finalWidth / img.naturalWidth, finalHeight / img.naturalHeight);
+                        const adaptiveStrength = Math.min(0.85, 0.5 + (zoomLevel - 2) * 0.08); // Much stronger at higher zoom
+                        
+                        // Normalize sharpened values
+                        sharpR = Math.max(0, Math.min(255, sharpR));
+                        sharpG = Math.max(0, Math.min(255, sharpG));
+                        sharpB = Math.max(0, Math.min(255, sharpB));
+                        
+                        // Blend original with sharpened version
+                        processedData[idx] = Math.max(0, Math.min(255, 
+                            data[idx] * (1 - adaptiveStrength) + sharpR * adaptiveStrength
+                        ));
+                        processedData[idx + 1] = Math.max(0, Math.min(255, 
+                            data[idx + 1] * (1 - adaptiveStrength) + sharpG * adaptiveStrength
+                        ));
+                        processedData[idx + 2] = Math.max(0, Math.min(255, 
+                            data[idx + 2] * (1 - adaptiveStrength) + sharpB * adaptiveStrength
+                        ));
+                    }
+                }
+                
+                // Apply second pass with stronger unsharp mask for fine details
+                const secondPassData = new Uint8ClampedArray(processedData);
+                for (let y = 1; y < height - 1; y += 1) {
+                    for (let x = 1; x < width - 1; x += 1) {
+                        const idx = (y * width + x) * 4;
+                        
+                        // Enhanced unsharp mask with 3x3 kernel for better blur
+                        let sumR = 0, sumG = 0, sumB = 0;
+                        let count = 0;
+                        
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                const nIdx = ((y + dy) * width + (x + dx)) * 4;
+                                sumR += processedData[nIdx];
+                                sumG += processedData[nIdx + 1];
+                                sumB += processedData[nIdx + 2];
+                                count++;
+                            }
+                        }
+                        
+                        const avgR = sumR / count;
+                        const avgG = sumG / count;
+                        const avgB = sumB / count;
+                        
+                        // Stronger second pass
+                        const strength2 = 0.25; // Increased from 0.15
+                        secondPassData[idx] = Math.max(0, Math.min(255, 
+                            processedData[idx] + (processedData[idx] - avgR) * strength2
+                        ));
+                        secondPassData[idx + 1] = Math.max(0, Math.min(255, 
+                            processedData[idx + 1] + (processedData[idx + 1] - avgG) * strength2
+                        ));
+                        secondPassData[idx + 2] = Math.max(0, Math.min(255, 
+                            processedData[idx + 2] + (processedData[idx + 2] - avgB) * strength2
+                        ));
+                    }
+                }
+                
+                // Apply third pass for edge enhancement (lighter but focused on edges)
+                const thirdPassData = new Uint8ClampedArray(secondPassData);
+                for (let y = 2; y < height - 2; y += 1) {
+                    for (let x = 2; x < width - 2; x += 1) {
+                        const idx = (y * width + x) * 4;
+                        
+                        // Edge detection using Sobel-like operator
+                        const gxR = -secondPassData[((y - 1) * width + (x - 1)) * 4] 
+                                   - 2 * secondPassData[((y) * width + (x - 1)) * 4]
+                                   - secondPassData[((y + 1) * width + (x - 1)) * 4]
+                                   + secondPassData[((y - 1) * width + (x + 1)) * 4]
+                                   + 2 * secondPassData[((y) * width + (x + 1)) * 4]
+                                   + secondPassData[((y + 1) * width + (x + 1)) * 4];
+                        
+                        const gyR = -secondPassData[((y - 1) * width + (x - 1)) * 4]
+                                   - 2 * secondPassData[((y - 1) * width + (x)) * 4]
+                                   - secondPassData[((y - 1) * width + (x + 1)) * 4]
+                                   + secondPassData[((y + 1) * width + (x - 1)) * 4]
+                                   + 2 * secondPassData[((y + 1) * width + (x)) * 4]
+                                   + secondPassData[((y + 1) * width + (x + 1)) * 4];
+                        
+                        const edgeStrengthR = Math.sqrt(gxR * gxR + gyR * gyR) / 8;
+                        
+                        // Apply edge enhancement only where edges are detected
+                        const edgeEnhancement = Math.min(0.15, edgeStrengthR / 50);
+                        thirdPassData[idx] = Math.max(0, Math.min(255, 
+                            secondPassData[idx] + (secondPassData[idx] - 128) * edgeEnhancement
+                        ));
+                        thirdPassData[idx + 1] = Math.max(0, Math.min(255, 
+                            secondPassData[idx + 1] + (secondPassData[idx + 1] - 128) * edgeEnhancement
+                        ));
+                        thirdPassData[idx + 2] = Math.max(0, Math.min(255, 
+                            secondPassData[idx + 2] + (secondPassData[idx + 2] - 128) * edgeEnhancement
+                        ));
+                    }
+                }
+                
+                // Create new ImageData with processed data (using third pass)
+                const newImageData = new ImageData(thirdPassData, width, height);
+                canvasContext.putImageData(newImageData, 0, 0);
+                
+                // Log success for debugging
+                console.log('Sharpening applied successfully:', {
+                    width: finalWidth,
+                    height: finalHeight,
+                    zoomLevel: Math.max(finalWidth / img.naturalWidth, finalHeight / img.naturalHeight).toFixed(2)
+                });
+            } catch (e) {
+                // If processing fails (e.g., CORS), just use the upscaled image without sharpening
+                console.warn('Image processing limited by CORS or memory constraints:', e);
+                console.warn('Using upscaled image without sharpening');
+            }
+        }
+        
+        function switchToCanvasIfNeeded() {
+            // Preload canvas when approaching threshold
+            if (currentZoom >= ZOOM_THRESHOLD_FOR_UPSCALE * 0.9 && !canvasPreloaded && !isProcessingCanvas) {
+                preloadCanvas();
+            }
+            
+            // Switch to canvas when threshold is reached
+            if (currentZoom >= ZOOM_THRESHOLD_FOR_UPSCALE && !useCanvas && canvasPreloaded) {
+                // Match canvas display size exactly to current image size
+                const imgRect = fullscreenImage.getBoundingClientRect();
+                const img = fullscreenImage;
+                const naturalAspect = img.naturalWidth / img.naturalHeight;
+                
+                // Calculate displayed size
+                let displayWidth, displayHeight;
+                const container = fullscreenImage.parentElement;
+                const containerWidth = container.clientWidth;
+                const containerHeight = container.clientHeight;
+                
+                if (imgRect.width > 0 && imgRect.height > 0) {
+                    displayWidth = imgRect.width;
+                    displayHeight = imgRect.height;
+                } else {
+                    // Fallback calculation
+                    const scale = Math.min(containerWidth / img.naturalWidth, containerHeight / img.naturalHeight);
+                    displayWidth = img.naturalWidth * scale;
+                    displayHeight = img.naturalHeight * scale;
+                }
+                
+                // Set canvas to exact same display size
+                fullscreenCanvas.style.width = displayWidth + 'px';
+                fullscreenCanvas.style.height = displayHeight + 'px';
+                
+                // Smooth transition: fade out image, fade in canvas
+                fullscreenImage.classList.add('hidden');
+                fullscreenCanvas.classList.add('active');
+                useCanvas = true;
+                updateImageTransform();
+            } else if (currentZoom < ZOOM_THRESHOLD_FOR_UPSCALE && useCanvas) {
+                // Smooth transition back: fade out canvas, fade in image
+                fullscreenCanvas.classList.remove('active');
+                setTimeout(() => {
+                    fullscreenImage.classList.remove('hidden');
+                    useCanvas = false;
+                    updateImageTransform();
+                }, 150); // Half of transition duration
+            }
+        }
+        
+        function preloadCanvas() {
+            if (isProcessingCanvas || canvasPreloaded) return;
+            
+            isProcessingCanvas = true;
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            img.onload = () => {
+                // Get current displayed image size to match canvas size
+                const displayedRect = fullscreenImage.getBoundingClientRect();
+                const displayedWidth = displayedRect.width;
+                const displayedHeight = displayedRect.height;
+                
+                // Calculate upscaled dimensions based on threshold zoom level
+                const baseWidth = img.naturalWidth;
+                const baseHeight = img.naturalHeight;
+                const scaleFactor = ZOOM_THRESHOLD_FOR_UPSCALE;
+                const targetWidth = Math.floor(baseWidth * scaleFactor);
+                const targetHeight = Math.floor(baseHeight * scaleFactor);
+                
+                // Upscale image with processing in background
+                try {
+                    console.log('Starting canvas upscaling and sharpening...');
+                    const startTime = performance.now();
+                    upscaleImageWithCanvas(img, targetWidth, targetHeight);
+                    const endTime = performance.now();
+                    console.log(`Canvas processing completed in ${(endTime - startTime).toFixed(0)}ms`);
+                    
+                    // Canvas will be sized to match image at transition time
+                    // Size will be set in switchToCanvasIfNeeded()
+                    
+                    canvasPreloaded = true;
+                } catch (e) {
+                    console.error('Error preloading canvas:', e);
+                    canvasPreloaded = false;
+                } finally {
+                    isProcessingCanvas = false;
+                }
+            };
+            
+            img.onerror = () => {
+                // If image fails to load (CORS issue), continue with regular image
+                console.log('Could not load image for processing, using regular zoom');
+                isProcessingCanvas = false;
+            };
+            
+            img.src = originalImageSrc;
+        }
+        
+        function openFullscreen(imageSrc, imageAlt) {
+            originalImageSrc = imageSrc;
+            fullscreenImage.src = imageSrc;
+            fullscreenImage.alt = imageAlt;
+            thumbnailImage.src = imageSrc; // Set thumbnail image
+            fullscreenModal.classList.add('active');
+            useCanvas = false;
+            canvasPreloaded = false;
+            isProcessingCanvas = false;
+            
+            // Reset zoom and pan
+            currentZoom = 1;
+            currentPanX = 0;
+            currentPanY = 0;
+            fullscreenImage.classList.remove('hidden');
+            fullscreenImage.style.opacity = '1';
+            fullscreenCanvas.classList.remove('active');
+            fullscreenCanvas.style.opacity = '0';
+            updateImageTransform();
+            
+            // Show overlay after a short delay
+            setTimeout(() => {
+                updateZoomOverlay();
+            }, 300);
+            
+            // Request native fullscreen
+            if (fullscreenModal.requestFullscreen) {
+                fullscreenModal.requestFullscreen();
+            } else if (fullscreenModal.webkitRequestFullscreen) {
+                fullscreenModal.webkitRequestFullscreen();
+            } else if (fullscreenModal.mozRequestFullScreen) {
+                fullscreenModal.mozRequestFullScreen();
+            } else if (fullscreenModal.msRequestFullscreen) {
+                fullscreenModal.msRequestFullscreen();
+            }
+        }
+        
+        function closeFullscreen() {
+            // Exit native fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            
+            fullscreenModal.classList.remove('active');
+            zoomOverlay.classList.remove('visible');
+            thumbnailOverlay.classList.remove('visible');
+            
+            // Reset zoom and pan
+            currentZoom = 1;
+            currentPanX = 0;
+            currentPanY = 0;
+            fullscreenImage.classList.remove('zoomed');
+            fullscreenImage.classList.remove('hidden');
+            fullscreenImage.style.opacity = '1';
+            fullscreenCanvas.classList.remove('active');
+            fullscreenCanvas.style.opacity = '0';
+            useCanvas = false;
+            canvasPreloaded = false;
+            isProcessingCanvas = false;
+            originalImageSrc = '';
+        }
+        
+        // Handle fullscreen change events
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                closeFullscreen();
+            }
+        });
+        
+        document.addEventListener('webkitfullscreenchange', () => {
+            if (!document.webkitFullscreenElement) {
+                closeFullscreen();
+            }
+        });
+        
+        document.addEventListener('mozfullscreenchange', () => {
+            if (!document.mozFullScreenElement) {
+                closeFullscreen();
+            }
+        });
+        
+        document.addEventListener('MSFullscreenChange', () => {
+            if (!document.msFullscreenElement) {
+                closeFullscreen();
+            }
+        });
+        
+        function updateZoomOverlay() {
+            if (!fullscreenModal.classList.contains('active')) {
+                zoomOverlay.classList.remove('visible');
+                thumbnailOverlay.classList.remove('visible');
+                return;
+            }
+            
+            // Show overlays
+            zoomOverlay.classList.add('visible');
+            thumbnailOverlay.classList.add('visible');
+            
+            // Update zoom level
+            const zoomValue = currentZoom.toFixed(1);
+            zoomLevelDisplay.textContent = `x${zoomValue}`;
+            
+            // Update technique
+            if (useCanvas) {
+                zoomTechniqueDisplay.textContent = 'Rééchantillonnage + Netteté';
+            } else if (currentZoom >= ZOOM_THRESHOLD_FOR_UPSCALE * 0.9 && canvasPreloaded) {
+                zoomTechniqueDisplay.textContent = 'Rééchantillonnage en préparation';
+            } else {
+                zoomTechniqueDisplay.textContent = 'Image normale';
+            }
+            
+            // Update thumbnail viewport
+            updateThumbnailViewport();
+        }
+        
+        function updateThumbnailViewport() {
+            if (!fullscreenModal.classList.contains('active')) {
+                thumbnailViewport.style.display = 'none';
+                return;
+            }
+            
+            // Hide viewport if zoom is 1x
+            if (currentZoom <= 1) {
+                thumbnailViewport.style.display = 'none';
+                return;
+            }
+            
+            thumbnailViewport.style.display = 'block';
+            
+            // Get the active image element
+            const activeImg = useCanvas ? fullscreenCanvas : fullscreenImage;
+            const containerRect = fullscreenImage.parentElement.getBoundingClientRect();
+            const thumbnailContainer = thumbnailImage.parentElement;
+            const thumbnailContainerRect = thumbnailContainer.getBoundingClientRect();
+            
+            // Get natural image dimensions (always use original, not upscaled canvas)
+            const naturalWidth = fullscreenImage.naturalWidth;
+            const naturalHeight = fullscreenImage.naturalHeight;
+            
+            if (!naturalWidth || !naturalHeight) {
+                thumbnailViewport.style.display = 'none';
+                return;
+            }
+            
+            // Get the actual displayed image rect (after transformations)
+            const imgRect = activeImg.getBoundingClientRect();
+            
+            // Calculate the base displayed size (at zoom 1x, before transform)
+            const containerAspect = containerRect.width / containerRect.height;
+            const imageAspect = naturalWidth / naturalHeight;
+            
+            let baseDisplayWidth, baseDisplayHeight;
+            if (imageAspect > containerAspect) {
+                baseDisplayWidth = containerRect.width;
+                baseDisplayHeight = containerRect.width / imageAspect;
+            } else {
+                baseDisplayHeight = containerRect.height;
+                baseDisplayWidth = containerRect.height * imageAspect;
+            }
+            
+            // The image is centered in container at base size
+            const baseImageX = (containerRect.width - baseDisplayWidth) / 2;
+            const baseImageY = (containerRect.height - baseDisplayHeight) / 2;
+            
+            // Calculate what part of the base image is visible
+            // The viewport is the container size divided by zoom
+            const viewportWidth = containerRect.width / currentZoom;
+            const viewportHeight = containerRect.height / currentZoom;
+            
+            // Calculate viewport position in base image coordinates
+            // Container center minus pan offset
+            const viewportCenterX = containerRect.width / 2 - currentPanX;
+            const viewportCenterY = containerRect.height / 2 - currentPanY;
+            
+            // Convert to base image coordinates
+            const viewportX = viewportCenterX - baseImageX - viewportWidth / 2;
+            const viewportY = viewportCenterY - baseImageY - viewportHeight / 2;
+            
+            // Clamp to image bounds
+            const clampedX = Math.max(0, Math.min(baseDisplayWidth - viewportWidth, viewportX));
+            const clampedY = Math.max(0, Math.min(baseDisplayHeight - viewportHeight, viewportY));
+            
+            // Now map to thumbnail
+            // Calculate thumbnail displayed size
+            const thumbnailAspect = thumbnailContainerRect.width / thumbnailContainerRect.height;
+            let thumbnailDisplayWidth, thumbnailDisplayHeight;
+            
+            if (imageAspect > thumbnailAspect) {
+                thumbnailDisplayWidth = thumbnailContainerRect.width;
+                thumbnailDisplayHeight = thumbnailContainerRect.width / imageAspect;
+            } else {
+                thumbnailDisplayHeight = thumbnailContainerRect.height;
+                thumbnailDisplayWidth = thumbnailContainerRect.height * imageAspect;
+            }
+            
+            // Scale factor from base displayed image to thumbnail
+            const scale = thumbnailDisplayWidth / baseDisplayWidth;
+            
+            // Calculate viewport in thumbnail
+            const thumbnailViewportWidth = viewportWidth * scale;
+            const thumbnailViewportHeight = viewportHeight * scale;
+            
+            // Thumbnail image is centered
+            const thumbnailImageX = (thumbnailContainerRect.width - thumbnailDisplayWidth) / 2;
+            const thumbnailImageY = (thumbnailContainerRect.height - thumbnailDisplayHeight) / 2;
+            
+            // Position viewport in thumbnail
+            const thumbnailViewportX = thumbnailImageX + clampedX * scale;
+            const thumbnailViewportY = thumbnailImageY + clampedY * scale;
+            
+            // Apply to viewport element
+            thumbnailViewport.style.width = thumbnailViewportWidth + 'px';
+            thumbnailViewport.style.height = thumbnailViewportHeight + 'px';
+            thumbnailViewport.style.left = thumbnailViewportX + 'px';
+            thumbnailViewport.style.top = thumbnailViewportY + 'px';
+        }
+        
+        function updateImageTransform() {
+            // Update both elements to maintain visual continuity
+            if (useCanvas) {
+                // For canvas, we apply scale on the already upscaled image
+                const baseScale = ZOOM_THRESHOLD_FOR_UPSCALE;
+                const additionalScale = currentZoom / baseScale;
+                fullscreenCanvas.style.transform = `scale(${additionalScale}) translate(${currentPanX}px, ${currentPanY}px)`;
+                
+                // Keep image hidden but sync transform for smooth transition
+                fullscreenImage.style.transform = `scale(${currentZoom}) translate(${currentPanX}px, ${currentPanY}px)`;
+            } else {
+                fullscreenImage.style.transform = `scale(${currentZoom}) translate(${currentPanX}px, ${currentPanY}px)`;
+                
+                // Keep canvas synced for smooth transition
+                if (canvasPreloaded) {
+                    const baseScale = ZOOM_THRESHOLD_FOR_UPSCALE;
+                    const additionalScale = currentZoom / baseScale;
+                    fullscreenCanvas.style.transform = `scale(${additionalScale}) translate(${currentPanX}px, ${currentPanY}px)`;
+                }
+            }
+            
+            if (currentZoom > 1) {
+                fullscreenImage.classList.add('zoomed');
+                if (useCanvas) {
+                    fullscreenCanvas.style.cursor = 'grab';
+                }
+            } else {
+                fullscreenImage.classList.remove('zoomed');
+                currentPanX = 0;
+                currentPanY = 0;
+            }
+            
+            // Update zoom overlay
+            updateZoomOverlay();
+        }
+        
+        // Zoom with mouse wheel
+        function handleZoom(e) {
+            if (!fullscreenModal.classList.contains('active')) return;
+            
+            e.preventDefault();
+            
+            const zoomSpeed = 0.1;
+            const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed;
+            const newZoom = Math.max(1, Math.min(16, currentZoom + delta));
+            
+            if (newZoom !== currentZoom) {
+                const currentElement = useCanvas ? fullscreenCanvas : fullscreenImage;
+                const rect = currentElement.getBoundingClientRect();
+                const wrapperRect = currentElement.parentElement.getBoundingClientRect();
+                
+                // Calculate mouse position relative to image center
+                const mouseX = e.clientX - wrapperRect.left - wrapperRect.width / 2;
+                const mouseY = e.clientY - wrapperRect.top - wrapperRect.height / 2;
+                
+                // Calculate zoom point relative to current pan
+                const effectiveZoom = useCanvas ? (currentZoom / ZOOM_THRESHOLD_FOR_UPSCALE) : currentZoom;
+                const imageX = (mouseX - currentPanX) / effectiveZoom;
+                const imageY = (mouseY - currentPanY) / effectiveZoom;
+                
+                // Update zoom
+                const oldZoom = currentZoom;
+                currentZoom = newZoom;
+                
+                // Adjust pan to zoom towards mouse position
+                const newEffectiveZoom = useCanvas ? (newZoom / ZOOM_THRESHOLD_FOR_UPSCALE) : newZoom;
+                currentPanX = mouseX - imageX * newEffectiveZoom;
+                currentPanY = mouseY - imageY * newEffectiveZoom;
+                
+                // Check if we need to switch to/from canvas
+                const wasUsingCanvas = useCanvas;
+                switchToCanvasIfNeeded();
+                
+                // If we just switched to canvas, recalculate pan
+                if (!wasUsingCanvas && useCanvas) {
+                    const newEffectiveZoom2 = currentZoom / ZOOM_THRESHOLD_FOR_UPSCALE;
+                    currentPanX = mouseX - imageX * newEffectiveZoom2;
+                    currentPanY = mouseY - imageY * newEffectiveZoom2;
+                }
+                
+                updateImageTransform();
+            }
+        }
+        
+        fullscreenImage.addEventListener('wheel', handleZoom, { passive: false });
+        fullscreenCanvas.addEventListener('wheel', handleZoom, { passive: false });
+        
+        // Drag to pan when zoomed
+        function handleMouseDown(e) {
+            if (currentZoom > 1 && e.button === 0) { // Left mouse button
+                isDragging = true;
+                dragStartX = e.clientX - currentPanX;
+                dragStartY = e.clientY - currentPanY;
+                const element = useCanvas ? fullscreenCanvas : fullscreenImage;
+                element.style.cursor = 'grabbing';
+            }
+        }
+        
+        fullscreenImage.addEventListener('mousedown', handleMouseDown);
+        fullscreenCanvas.addEventListener('mousedown', handleMouseDown);
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && currentZoom > 1) {
+                currentPanX = e.clientX - dragStartX;
+                currentPanY = e.clientY - dragStartY;
+                updateImageTransform();
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                if (currentZoom > 1) {
+                    const element = useCanvas ? fullscreenCanvas : fullscreenImage;
+                    element.style.cursor = 'grab';
+                }
+            }
+        });
+        
+        // Close modal on click outside image
+        fullscreenModal.addEventListener('click', (e) => {
+            if (e.target === fullscreenModal || e.target === fullscreenClose) {
+                closeFullscreen();
+            }
+        });
+        
+        // Close modal on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && fullscreenModal.classList.contains('active')) {
+                closeFullscreen();
+            }
+        });
+        
+        // Add double-click handler to artwork image
+        function setupFullscreenHandler() {
+            const artworkImage = document.querySelector('.oeuvre-image');
+            if (artworkImage) {
+                // Add double-click listener
+                artworkImage.addEventListener('dblclick', (e) => {
+                    e.preventDefault();
+                    // Use data attribute or src, preferring data attribute for full resolution
+                    const imageSrc = artworkImage.dataset.fullscreenSrc || artworkImage.src;
+                    const imageAlt = artworkImage.alt;
+                    openFullscreen(imageSrc, imageAlt);
+                });
+            }
+        }
+        
+        // Wait for data to load
+        window.addEventListener('artworksDataLoaded', () => {
+            renderArtworkPage();
+            // Setup fullscreen handler after rendering
+            setTimeout(setupFullscreenHandler, 50);
+        });
+        
+        // If data is already loaded (race condition)
+        if (allArtworks.length > 0) {
+            renderArtworkPage();
+            setTimeout(setupFullscreenHandler, 50);
+        }
+    </script>
+</body>
+</html>
+

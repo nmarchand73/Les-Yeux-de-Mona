@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les Yeux de Mona - Collection d'œuvres</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="site-title">Les Yeux de Mona</h1>
+            <p class="site-subtitle">Exploration des œuvres citées par Thomas Schlesser</p>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-controls">
+                <div class="view-toggle">
+                    <button class="btn-view active" data-view="gallery" aria-label="Vue galerie">
+                        <span>Galerie</span>
+                    </button>
+                    <button class="btn-view" data-view="timeline" aria-label="Vue chronologique">
+                        <span>Timeline</span>
+                    </button>
+                </div>
+                
+                <div class="filters">
+                    <input type="text" id="search" class="search-input" placeholder="Rechercher une œuvre ou un artiste...">
+                    
+                    <select id="filter-museum" class="filter-select">
+                        <option value="">Tous les musées</option>
+                    </select>
+                    
+                    <select id="filter-artist" class="filter-select">
+                        <option value="">Tous les artistes</option>
+                    </select>
+                    
+                    <select id="filter-technique" class="filter-select">
+                        <option value="">Toutes les techniques</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <div id="gallery-view" class="view active">
+                <div id="artworks-grid" class="artworks-grid">
+                    <!-- Artworks will be inserted here by JavaScript -->
+                </div>
+            </div>
+            
+            <div id="timeline-view" class="view">
+                <div id="timeline-container" class="timeline-container">
+                    <!-- Timeline will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>Collection basée sur le livre "Les Yeux de Mona" de Thomas Schlesser</p>
+            <p>Source: <a href="https://www.martinpaquin.com/liens-des-oeuvres-cites-dans-le-livre-les-yeux-de-mona-par-thomas-schlesser/" target="_blank">Martin Paquin</a></p>
+        </div>
+    </footer>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
+
