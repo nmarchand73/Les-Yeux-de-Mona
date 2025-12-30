@@ -152,6 +152,45 @@
             border-color: var(--color-accent);
         }
         
+        .bibliographie-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+        }
+        
+        .bibliographie-label {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .bibliographie-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .bibliographie-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--color-text);
+        }
+        
+        .bibliographie-item:last-child {
+            border-bottom: none;
+        }
+        
+        .bibliographie-item::before {
+            content: "📚";
+            margin-right: 0.5rem;
+            opacity: 0.6;
+        }
+        
         .explanations {
             margin-top: 3rem;
         }
@@ -531,8 +570,8 @@
                 </div>
                 
                 <div class="oeuvre-main">
-                    <div class="oeuvre-image-container">
-                        <img src="../${artwork.image_hd_local}" alt="${artwork.titre}" class="oeuvre-image" data-fullscreen-src="../${artwork.image_hd_local}">
+                    <div class="oeuvre-image-container" id="oeuvre-image-container">
+                        <img src="../${artwork.image_hd_local}" alt="${artwork.titre}" class="oeuvre-image" data-fullscreen-src="../${artwork.image_hd_local}" id="oeuvre-image">
                     </div>
                     
                     <div class="oeuvre-details">
@@ -561,6 +600,17 @@
                         ${artwork.lien ? `<a href="${artwork.lien}" target="_blank" class="oeuvre-link">Voir sur le site du musée →</a>` : ''}
                     </div>
                 </div>
+                
+                ${artwork.bibliographie && artwork.bibliographie.length > 0 ? `
+                <div class="bibliographie-section">
+                    <div class="bibliographie-label">Références bibliographiques</div>
+                    <ul class="bibliographie-list">
+                        ${artwork.bibliographie.map(ref => `
+                            <li class="bibliographie-item">${ref}</li>
+                        `).join('')}
+                    </ul>
+                </div>
+                ` : ''}
                 
                 <div class="explanations">
                     ${artwork.comment_comprendre ? `
@@ -627,7 +677,7 @@
         let isProcessingCanvas = false;
         const ZOOM_THRESHOLD_FOR_UPSCALE = 2.0; // Seuil de zoom pour activer le rééchantillonnage
         
-        function upscaleImageWithCanvas(img, targetWidth, targetHeight) {
+        async function upscaleImageWithCanvas(img, targetWidth, targetHeight) {
             // Initialize canvas context if needed
             if (!canvasContext) {
                 canvasContext = fullscreenCanvas.getContext('2d', { 
@@ -977,15 +1027,20 @@
         }
         
         function closeFullscreen() {
-            // Exit native fullscreen
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
+            // Exit native fullscreen seulement si on est en mode fullscreen
+            if (document.fullscreenElement || document.webkitFullscreenElement || 
+                document.mozFullScreenElement || document.msFullscreenElement) {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {
+                        // Ignorer les erreurs si on n'est pas en fullscreen
+                    });
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
             }
             
             fullscreenModal.classList.remove('active');
