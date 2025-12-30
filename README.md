@@ -1,119 +1,119 @@
 # Les Yeux de Mona
 
-Site web élégant présentant les œuvres d'art citées dans le livre "Les Yeux de Mona" de Thomas Schlesser. Explorez une collection soigneusement sélectionnée d'œuvres du Louvre, du Musée d'Orsay et du Centre Pompidou (Beaubourg).
+Elegant web application showcasing artworks referenced in "Les Yeux de Mona" by Thomas Schlesser. Explore a carefully curated collection of works from the Louvre, Musée d'Orsay, and Centre Pompidou (Beaubourg).
 
-## 🎨 Fonctionnalités
+## 🎨 Features
 
-### Galerie interactive
-- **Vue galerie** : Grille responsive avec effet Ken Burns sur les images
-- **Vue timeline** : Chronologie des œuvres par date
-- **Filtres avancés** : Recherche par titre, artiste, musée et techniques artistiques
-- **Navigation fluide** : Transitions élégantes et animations subtiles
+### Interactive Gallery
+- **Gallery View**: Responsive grid with Ken Burns effect on images
+- **Timeline View**: Chronological display of artworks by date
+- **Advanced Filters**: Search by title, artist, museum, and artistic techniques
+- **Smooth Navigation**: Elegant transitions and subtle animations
 
-### Visualisation d'œuvres
-- **Pages détaillées** : Informations complètes sur chaque œuvre
-- **Zoom avancé** : Zoom jusqu'à 16x avec rééchantillonnage intelligent
-- **Mode plein écran** : Visualisation immersive en plein écran natif
-- **Rééchantillonnage d'images** : Amélioration automatique de la netteté au-delà de 2x de zoom
-- **Miniature de navigation** : Vue d'ensemble avec cadre indiquant la zone visible
-- **Pan et zoom** : Navigation fluide avec la molette et le glisser-déposer
+### Artwork Visualization
+- **Detailed Pages**: Complete information for each artwork
+- **Advanced Zoom**: Zoom up to 16x with intelligent image upscaling
+- **Fullscreen Mode**: Immersive native fullscreen viewing
+- **Image Upscaling**: Automatic sharpness enhancement beyond 2x zoom
+- **Navigation Thumbnail**: Overview with frame indicating visible area
+- **Pan and Zoom**: Smooth navigation with mouse wheel and drag
 
-### Contenu enrichi
-- **Explications détaillées** : "Comment comprendre cette œuvre" et "Ce qu'il faut voir"
-- **Techniques artistiques** : Badges affichant les techniques spécifiques à chaque œuvre
-- **Métadonnées complètes** : Date, artiste, musée, lien vers le site officiel
+### Enriched Content
+- **Detailed Explanations**: "How to understand this artwork" and "What to see"
+- **Artistic Techniques**: Badges displaying techniques specific to each artwork
+- **Complete Metadata**: Date, artist, museum, link to official website
 
 ## 🚀 Installation
 
-### Prérequis
-- Un serveur web local (ou hébergement web)
-- Aucune dépendance externe requise (site statique)
+### Prerequisites
+- A local web server (or web hosting)
+- No external dependencies required (static site)
 
-### Démarrage rapide
+### Quick Start
 
-1. Clonez le dépôt :
+1. Clone the repository:
 ```bash
 git clone https://github.com/nmarchand73/Les-Yeux-de-Mona.git
 cd Les-Yeux-de-Mona
 ```
 
-2. Ouvrez le site :
-   - **Option 1** : Ouvrez `site/index.html` directement dans votre navigateur
-   - **Option 2** : Utilisez un serveur local :
+2. Open the site:
+   - **Option 1**: Open `site/index.html` directly in your browser
+   - **Option 2**: Use a local server:
      ```bash
-     # Avec Python
+     # With Python
      cd site
      python -m http.server 8000
      
-     # Avec Node.js (http-server)
+     # With Node.js (http-server)
      npx http-server site -p 8000
      ```
 
-3. Accédez à `http://localhost:8000` dans votre navigateur
+3. Access `http://localhost:8000` in your browser
 
-## 📁 Structure du projet
+## 📁 Project Structure
 
 ```
 Les-Yeux-de-Mona/
-├── site/                    # Site web principal
-│   ├── index.html          # Page d'accueil avec galerie
-│   ├── oeuvre.html         # Page de détail d'une œuvre
+├── site/                    # Main website
+│   ├── index.html          # Homepage with gallery
+│   ├── oeuvre.html         # Artwork detail page
 │   ├── css/
-│   │   └── style.css       # Styles principaux
+│   │   └── style.css       # Main styles
 │   ├── js/
-│   │   ├── data.js         # Chargement des données JSON
-│   │   └── app.js          # Logique de l'application
+│   │   ├── data.js         # JSON data loading
+│   │   └── app.js          # Application logic
 │   └── data/
-│       └── artworks.json   # Données des œuvres (métadonnées + explications)
-├── images/                  # Images HD des œuvres
+│       └── artworks.json   # Artwork data (metadata + explanations)
+├── images/                  # HD artwork images
 │   ├── louvre/
 │   ├── orsay/
 │   └── beaubourg/
 └── README.md
 ```
 
-## 🎯 Technologies utilisées
+## 🎯 Technologies Used
 
-- **HTML5** : Structure sémantique
-- **CSS3** : Animations, transitions, effets visuels
-- **JavaScript (Vanilla)** : Logique interactive, chargement asynchrone
-- **Canvas API** : Rééchantillonnage et amélioration d'images
-- **Fullscreen API** : Mode plein écran natif
+- **HTML5**: Semantic structure
+- **CSS3**: Animations, transitions, visual effects
+- **Vanilla JavaScript**: Interactive logic, asynchronous loading
+- **Canvas API**: Image upscaling and enhancement
+- **Fullscreen API**: Native fullscreen mode
 
-## ✨ Fonctionnalités techniques avancées
+## ✨ Advanced Technical Features
 
-### Rééchantillonnage d'images
-- **Upscaling progressif** : Agrandissement par étapes de 2x pour préserver la qualité
-- **Sharpening multi-passes** :
-  - Passe 1 : Laplacian sharpening pour la détection des bords
-  - Passe 2 : Unsharp mask avec kernel 3x3
-  - Passe 3 : Edge enhancement avec détection de contours (Sobel-like)
-- **Adaptation dynamique** : Force du sharpening adaptée au niveau de zoom
+### Image Upscaling
+- **Progressive Upscaling**: 2x step-by-step enlargement to preserve quality
+- **Multi-pass Sharpening**:
+  - Pass 1: Laplacian sharpening for edge detection
+  - Pass 2: Unsharp mask with 3x3 kernel
+  - Pass 3: Edge enhancement with contour detection (Sobel-like)
+- **Dynamic Adaptation**: Sharpening strength adapted to zoom level
 
-### Effet Ken Burns
-- Animations CSS pures (pas de bibliothèque externe)
-- 4 variantes d'animation pour plus de diversité
-- Accélération au survol avec zoom accentué
-- Transitions fluides sans saccades
+### Ken Burns Effect
+- Pure CSS animations (no external library)
+- 4 animation variants for diversity
+- Acceleration on hover with enhanced zoom
+- Smooth transitions without jitter
 
 ### Performance
-- Chargement asynchrone des données JSON
-- Images lazy-loading
-- Préchargement intelligent du canvas pour le rééchantillonnage
-- Optimisations CSS avec `will-change` et `transform`
+- Asynchronous JSON data loading
+- Lazy-loading images
+- Intelligent canvas preloading for upscaling
+- CSS optimizations with `will-change` and `transform`
 
-## 📊 Données
+## 📊 Data
 
-Les données des œuvres sont stockées dans `site/data/artworks.json` et incluent :
-- Métadonnées : titre, artiste, date, musée, lien
-- Images : URL HD et chemin local
-- Explications : "comment_comprendre" et "ce_quil_faut_voir"
-- Techniques : liste des techniques artistiques spécifiques
+Artwork data is stored in `site/data/artworks.json` and includes:
+- Metadata: title, artist, date, museum, link
+- Images: HD URL and local path
+- Explanations: "comment_comprendre" and "ce_quil_faut_voir"
+- Techniques: list of specific artistic techniques
 
-## 🎨 Personnalisation
+## 🎨 Customization
 
-### Couleurs
-Les couleurs sont définies dans `:root` de `style.css` :
+### Colors
+Colors are defined in `:root` of `style.css`:
 ```css
 --color-bg: #f8f7f4;
 --color-accent: #2c3e50;
@@ -122,27 +122,26 @@ Les couleurs sont définies dans `:root` de `style.css` :
 ```
 
 ### Animations
-Les paramètres de zoom et de transition peuvent être ajustés dans `style.css` :
-- Seuil de rééchantillonnage : `ZOOM_THRESHOLD_FOR_UPSCALE = 2.0`
-- Zoom maximum : `Math.min(16, ...)`
-- Durées d'animation Ken Burns
+Zoom and transition parameters can be adjusted in `style.css`:
+- Upscaling threshold: `ZOOM_THRESHOLD_FOR_UPSCALE = 2.0`
+- Maximum zoom: `Math.min(16, ...)`
+- Ken Burns animation durations
 
-## 📝 Licence
+## 📝 License
 
-Ce projet est basé sur le livre "Les Yeux de Mona" de Thomas Schlesser.
+This project is based on the book "Les Yeux de Mona" by Thomas Schlesser.
 
-## 🙏 Remerciements
+## 🙏 Acknowledgments
 
-- **Thomas Schlesser** pour le livre "Les Yeux de Mona"
-- **Musées partenaires** : Louvre, Musée d'Orsay, Centre Pompidou
-- Images HD fournies par les musées respectifs
+- **Thomas Schlesser** for the book "Les Yeux de Mona"
+- **Partner Museums**: Louvre, Musée d'Orsay, Centre Pompidou
+- HD images provided by respective museums
 
-## 🔗 Liens
+## 🔗 Links
 
-- [Dépôt GitHub](https://github.com/nmarchand73/Les-Yeux-de-Mona)
-- [Livre "Les Yeux de Mona"](https://www.martinpaquin.com/liens-des-oeuvres-cites-dans-le-livre-les-yeux-de-mona-par-thomas-schlesser/)
+- [GitHub Repository](https://github.com/nmarchand73/Les-Yeux-de-Mona)
+- [Book "Les Yeux de Mona"](https://www.martinpaquin.com/liens-des-oeuvres-cites-dans-le-livre-les-yeux-de-mona-par-thomas-schlesser/)
 
 ---
 
-*Développé avec passion pour l'exploration des œuvres d'art* 🎨
-
+*Developed with passion for art exploration* 🎨
