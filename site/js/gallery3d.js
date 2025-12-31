@@ -213,12 +213,16 @@ function setupLights() {
         spot.position.set(spotX, spotY, spotZ);
         spot.target.position.set(spotX, paintingCenterY, paintingZ);
         spot.castShadow = true;
-        spot.shadow.mapSize.width = 2048; // Meilleure qualité d'ombre
-        spot.shadow.mapSize.height = 2048;
+        
+        // Configuration optimale des ombres pour qualité maximale
+        spot.shadow.mapSize.width = 4096; // Résolution doublée pour ombres ultra-précises
+        spot.shadow.mapSize.height = 4096;
         spot.shadow.camera.near = 0.5;
         spot.shadow.camera.far = 15;
-        spot.shadow.bias = -0.0001;
-        spot.shadow.radius = 4; // Ombres plus douces
+        spot.shadow.bias = -0.00005; // Bias optimisé pour réduire les artefacts
+        spot.shadow.normalBias = 0.02; // Normal bias pour éviter les artefacts sur surfaces inclinées
+        spot.shadow.radius = 6; // Ombres plus douces et réalistes
+        spot.shadow.blurSamples = 25; // Plus d'échantillons pour ombres plus lisses
         
         scene.add(spot);
         scene.add(spot.target);
@@ -565,8 +569,10 @@ function createGalleryFloor() {
     const floorMaterial = new THREE.MeshStandardMaterial({
         map: floorTexture,
         color: 0xd4c4b0, // Couleur de base (parquet chêne clair)
-        roughness: 0.8, // Parquet légèrement mat
-        metalness: 0.0
+        roughness: 0.75, // Parquet légèrement mat avec reflets subtils
+        metalness: 0.0,
+        envMapIntensity: 0.3, // Reflets subtils de l'environnement
+        flatShading: false // Smooth shading pour meilleur rendu
     });
     
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -583,8 +589,10 @@ function createGalleryWalls() {
     // 0xf5f5f0 = blanc cassé très légèrement gris, standard pour les musées
     const wallMaterial = new THREE.MeshStandardMaterial({
         color: 0xf5f5f0, // Blanc cassé neutre standard musée
-        roughness: 0.7, // Surface légèrement matte (plâtre)
-        metalness: 0.0
+        roughness: 0.65, // Surface légèrement matte (plâtre) avec reflets subtils
+        metalness: 0.0,
+        envMapIntensity: 0.2, // Reflets très subtils de l'environnement
+        flatShading: false // Smooth shading pour meilleur rendu
     });
     
     const wallHeight = 8;
@@ -869,17 +877,36 @@ function init() {
         camera.position.set(0, 1.5, 3.5);
         camera.lookAt(0, 1.5, -7.5); // Regarder vers le mur arrière où sera le tableau
         
-        // Renderer
+        // Renderer avec paramètres optimisés pour qualité maximale
         renderer = new THREE.WebGLRenderer({ 
             antialias: true,
-            powerPreference: 'high-performance'
+            powerPreference: 'high-performance',
+            alpha: false,
+            stencil: false,
+            depth: true,
+            logarithmicDepthBuffer: false
         });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        // Pixel ratio optimisé : jusqu'à 3 pour meilleure qualité sur écrans haute résolution
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
+        
+        // Configuration avancée des ombres pour qualité maximale
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Ombres douces de haute qualité
+        renderer.shadowMap.autoUpdate = true;
+        renderer.shadowMap.needsUpdate = true;
+        
+        // Tone mapping ACES Filmic pour rendu cinématique réaliste
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2; // Exposition légèrement augmentée pour meilleur rendu
+        renderer.toneMappingExposure = 1.15; // Exposition optimisée pour galerie
+        
+        // Color space et encoding pour meilleure précision des couleurs
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.useLegacyLights = false; // Utiliser le nouveau système d'éclairage
+        
+        // Physically correct lighting pour réalisme accru
+        renderer.useLegacyLights = false;
+        
         container.appendChild(renderer.domElement);
         
         // Contrôles de la caméra (OrbitControls)
@@ -988,17 +1015,24 @@ function animate() {
         }
     });
     
+    // Mettre à jour les ombres si nécessaire (pour meilleure qualité)
+    if (renderer && renderer.shadowMap) {
+        renderer.shadowMap.needsUpdate = true;
+    }
+    
     // Rendu
     renderer.render(scene, camera);
 }
 
-// Gestion du redimensionnement
+// Gestion du redimensionnement avec optimisations
 window.addEventListener('resize', () => {
     if (!camera || !renderer) return;
     
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    // Réinitialiser le pixel ratio après redimensionnement
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
 });
 
 // Fonction pour mettre à jour l'intensité des spots
