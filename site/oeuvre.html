@@ -1373,7 +1373,15 @@
                     // Use data attribute or src, preferring data attribute for full resolution
                     const imageSrc = artworkImage.dataset.fullscreenSrc || artworkImage.src;
                     const imageAlt = artworkImage.alt;
-                    openFullscreen(imageSrc, imageAlt);
+                    
+                    // Récupérer les informations de l'œuvre
+                    const artwork = allArtworks.find(a => a.id === artworkId);
+                    const title = artwork ? encodeURIComponent(artwork.titre) : '';
+                    const artist = artwork ? encodeURIComponent(artwork.artiste) : '';
+                    
+                    // Ouvrir la galerie 3D avec les paramètres
+                    const galleryUrl = `gallery3d.html?image=${encodeURIComponent(imageSrc)}&title=${title}&artist=${artist}`;
+                    window.open(galleryUrl, '_blank');
                 });
             }
         }
