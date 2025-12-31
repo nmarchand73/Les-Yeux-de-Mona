@@ -94,12 +94,18 @@ function switchView(view) {
     // Update views
     document.getElementById('gallery-view').classList.toggle('active', view === 'gallery');
     document.getElementById('timeline-view').classList.toggle('active', view === 'timeline');
+    const view3d = document.getElementById('3d-view');
+    if (view3d) {
+        view3d.classList.toggle('active', view === '3d');
+    }
     
     // Render appropriate view
     if (view === 'gallery') {
         renderGallery();
-    } else {
+    } else if (view === 'timeline') {
         renderTimeline();
+    } else if (view === '3d') {
+        open3DGallery();
     }
 }
 
@@ -126,8 +132,10 @@ function filterArtworks() {
     
     if (currentView === 'gallery') {
         renderGallery();
-    } else {
+    } else if (currentView === 'timeline') {
         renderTimeline();
+    } else if (currentView === '3d') {
+        // La vue 3D est gérée par open3DGallery
     }
 }
 
@@ -208,5 +216,29 @@ function extractYear(dateStr) {
         return parseInt(numbers[0]);
     }
     return 0;
+}
+
+// Open 3D Gallery with filtered artworks
+function open3DGallery() {
+    if (filteredArtworks.length === 0) {
+        filterArtworks(); // Initial filter
+    }
+    
+    if (filteredArtworks.length === 0) {
+        const container = document.getElementById('3d-container');
+        if (container) {
+            container.innerHTML = '<div class="empty-state"><h2>Aucune œuvre trouvée</h2><p>Essayez de modifier vos filtres de recherche.</p></div>';
+        }
+        return;
+    }
+    
+    // Passer uniquement les IDs des œuvres (beaucoup plus court)
+    const artworkIds = filteredArtworks.map(artwork => artwork.id);
+    
+    // Encoder les IDs en base64 pour réduire la taille
+    const encodedIds = encodeURIComponent(JSON.stringify(artworkIds));
+    
+    // Ouvrir la galerie 3D dans un nouvel onglet
+    window.open(`gallery3d-multi.html?ids=${encodedIds}`, '_blank');
 }
 

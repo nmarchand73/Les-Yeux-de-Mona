@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galerie 3D - Les Yeux de Mona</title>
+    <title>Galerie 3D Multi-Tableaux - Les Yeux de Mona</title>
     <script type="importmap">
     {
         "imports": {
@@ -172,54 +172,97 @@
             font-weight: bold;
             font-size: 0.85rem;
         }
+
+        .navigation-controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .navigation-controls h3 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .artwork-counter {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div id="canvas-container">
         <div id="loading">Chargement de la galerie 3D...</div>
         <span class="gallery-close" aria-label="Fermer" id="gallery-close">&times;</span>
-            <div class="light-controls" id="light-controls">
-                <h3>Éclairage</h3>
-                <div class="slider-group">
-                    <label>
-                        Configuration
-                    </label>
-                    <select id="light-config-select" style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">
-                        <option value="gallery-spots">Galerie spots</option>
-                        <option value="daylight">Lumière du jour</option>
-                        <option value="corner-spots">Spots aux coins</option>
-                        <option value="show">Spectacle animé</option>
-                    </select>
-                </div>
-                <div class="slider-group">
-                    <label>
-                        Position
-                    </label>
-                    <select id="painting-mode-select" style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">
-                        <option value="wall">Sur le mur</option>
-                        <option value="easel">Sur chevalet</option>
-                    </select>
-                </div>
-                <div class="slider-group">
-                    <label>
-                        Intensité des spots
-                        <span class="slider-value" id="spot-intensity-value">1.0</span>
-                    </label>
-                    <input type="range" id="spot-intensity-slider" min="0" max="3" step="0.1" value="1.0">
-                </div>
-                <div class="slider-group">
-                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
-                        <span id="spot-only-label">Mode spots uniquement</span>
-                        <input type="checkbox" id="spot-only-toggle" style="width: auto; margin-left: 10px; cursor: pointer;">
-                    </label>
-                    <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">
-                        Éteint la lumière ambiante pour magnifier le tableau
-                    </div>
+        <div class="light-controls" id="light-controls">
+            <h3>Éclairage</h3>
+            <div class="slider-group">
+                <label>
+                    Configuration
+                </label>
+                <select id="light-config-select" style="width: 100%; padding: 0.5rem; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">
+                    <option value="gallery-spots">Galerie spots</option>
+                    <option value="daylight">Lumière du jour</option>
+                    <option value="corner-spots">Spots aux coins</option>
+                    <option value="show">Spectacle animé</option>
+                </select>
+            </div>
+            <div class="slider-group">
+                <label>
+                    Intensité des spots
+                    <span class="slider-value" id="spot-intensity-value">1.0</span>
+                </label>
+                <input type="range" id="spot-intensity-slider" min="0" max="3" step="0.1" value="1.0">
+            </div>
+            <div class="slider-group">
+                <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                    <span id="spot-only-label">Mode spots uniquement</span>
+                    <input type="checkbox" id="spot-only-toggle" style="width: auto; margin-left: 10px; cursor: pointer;">
+                </label>
+                <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">
+                    Éteint la lumière ambiante pour magnifier les tableaux
                 </div>
             </div>
-        <div class="gallery-info" id="gallery-info" style="display: none;">
+        </div>
+        <div class="gallery-info" id="gallery-info">
             <h2 id="artwork-title"></h2>
             <p id="artwork-artist"></p>
+            <p id="artwork-dimensions" style="font-size: 0.85rem; color: #aaa; margin-bottom: 0.5rem;"></p>
             <div class="info-text">
                 <strong>Contrôles :</strong><br>
                 • Clic gauche + glisser : rotation de la caméra<br>
@@ -228,9 +271,17 @@
                 • ESC : fermer la galerie
             </div>
         </div>
+        <div class="navigation-controls">
+            <h3>Navigation</h3>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prev-artwork">← Précédent</button>
+                <button class="nav-btn" id="next-artwork">Suivant →</button>
+            </div>
+            <div class="artwork-counter" id="artwork-counter"></div>
+        </div>
     </div>
 
-    <script type="module" src="js/gallery3d.js"></script>
+    <script type="module" src="js/gallery3d-multi.js"></script>
 </body>
 </html>
 

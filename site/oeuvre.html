@@ -1379,8 +1379,16 @@
                     const title = artwork ? encodeURIComponent(artwork.titre) : '';
                     const artist = artwork ? encodeURIComponent(artwork.artiste) : '';
                     
+                    // Récupérer les dimensions réelles si disponibles
+                    let dimensionsParam = '';
+                    if (artwork && artwork.dimensions) {
+                        const height = artwork.dimensions.hauteur || '';
+                        const width = artwork.dimensions.largeur || '';
+                        dimensionsParam = `&height=${height}&width=${width}`;
+                    }
+                    
                     // Ouvrir la galerie 3D avec les paramètres
-                    const galleryUrl = `gallery3d.html?image=${encodeURIComponent(imageSrc)}&title=${title}&artist=${artist}`;
+                    const galleryUrl = `gallery3d.html?image=${encodeURIComponent(imageSrc)}&title=${title}&artist=${artist}${dimensionsParam}`;
                     window.open(galleryUrl, '_blank');
                 });
             }
