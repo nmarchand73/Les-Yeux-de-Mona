@@ -12,6 +12,7 @@ let lightHelpers = [];
 let spotLights = [];
 let spotHelpers = [];
 let ambientLight = null;
+let fillLights = []; // Tableau pour stocker toutes les fill lights
 let spotOnlyMode = false;
 let currentLightConfigName = 'gallery-spots';
 let directionalLight = null;
@@ -19,6 +20,11 @@ let areaLight = null;
 let animationEnabled = false;
 let animationTime = 0;
 let artworksData = []; // Données des œuvres à afficher
+
+// Textures partagées pour optimiser l'utilisation des unités de texture WebGL
+let sharedCanvasNormalMap = null;
+let sharedCanvasRoughnessMap = null;
+let sharedEnvironmentMap = null;
 
 // Configurations d'éclairage (réutilisées depuis gallery3d.js)
 const lightConfigurations = {
@@ -56,57 +62,6 @@ const lightConfigurations = {
             enabled: false
         }
     },
-    'daylight': {
-        name: 'Lumière du jour',
-        spots: {
-            enabled: false
-        },
-        ambientLight: {
-            enabled: false
-        },
-        fillLight: {
-            enabled: false
-        },
-        directionalLight: {
-            enabled: false
-        },
-        areaLight: {
-            enabled: true,
-            color: 0xe6f0ff,
-            intensity: 4.0,
-            width: 2.5,
-            height: 3.5,
-            position: { x: -7.4, y: 2.5, z: 0 }
-        }
-    },
-    'corner-spots': {
-        name: 'Spots aux coins',
-        spots: {
-            enabled: true,
-            count: 2,
-            colorTemperature: 0xfff4e5,
-            defaultIntensity: 1.2,
-            spacing: 0,
-            distanceFromWall: 0.4,
-            angle: 25 * Math.PI / 180,
-            beamAngle: 30 * Math.PI / 180,
-            distance: 15,
-            penumbra: 0.2,
-            decay: 1.5
-        },
-        ambientLight: {
-            enabled: false
-        },
-        fillLight: {
-            enabled: false
-        },
-        directionalLight: {
-            enabled: false
-        },
-        areaLight: {
-            enabled: false
-        }
-    },
     'show': {
         name: 'Spectacle animé',
         spots: {
@@ -134,6 +89,42 @@ const lightConfigurations = {
             color: 0xffffff,
             intensity: 0.8,
             position: { x: 0, y: 4.5, z: -6.5 }
+        },
+        directionalLight: {
+            enabled: false
+        },
+        areaLight: {
+            enabled: false
+        }
+    },
+    'caterpillar': {
+        name: 'Animation chenille',
+        spots: {
+            enabled: true,
+            count: 3,
+            colorTemperature: 0xfff4e5,
+            defaultIntensity: 1.0,
+            spacing: 0.8,
+            distanceFromWall: 0.6,
+            angle: 30 * Math.PI / 180,
+            beamAngle: 40 * Math.PI / 180,
+            distance: 20,
+            penumbra: 0.3,
+            decay: 1.5,
+            animated: true,
+            animationType: 'caterpillar'
+        },
+        ambientLight: {
+            enabled: true,
+            color: 0xffffff,
+            intensity: 0.4
+        },
+        fillLight: {
+            enabled: true,
+            type: 'point',
+            color: 0xffffff,
+            intensity: 0.3,
+            position: { x: 0, y: 5, z: 0 }
         },
         directionalLight: {
             enabled: false
@@ -964,32 +955,29 @@ function loadPainting(artwork, position) {
                 }
                 
                 const geometry = new THREE.PlaneGeometry(width, height);
-                const canvasNormalMap = createCanvasNormalMap();
-                const canvasRoughnessMap = createCanvasRoughnessMap();
                 
-                const frontMaterial = new THREE.MeshPhysicalMaterial({
-                    map: texture,
-                    normalMap: canvasNormalMap,
-                    normalScale: new THREE.Vector2(0.8, 0.8),
-                    roughnessMap: canvasRoughnessMap,
-                    side: THREE.FrontSide,
-                    roughness: 0.4,
-                    metalness: 0.0,
-                    clearcoat: 0.1,
-                    clearcoatRoughness: 0.3,
-                    clearcoatNormalMap: canvasNormalMap,
-                    clearcoatNormalScale: new THREE.Vector2(0.5, 0.5),
-                    reflectivity: 0.1,
-                    envMapIntensity: 0.15,
-                    ior: 1.5,
-                    transmission: 0.0,
-                    thickness: 0.0
-                });
-                
-                const envMap = createEnvironmentMap();
-                if (envMap) {
-                    frontMaterial.envMap = envMap;
+                // Utiliser les textures partagées pour éviter de dépasser la limite de 16 unités de texture
+                if (!sharedCanvasNormalMap) {
+                    sharedCanvasNormalMap = createCanvasNormalMap();
                 }
+                if (!sharedCanvasRoughnessMap) {
+                    sharedCanvasRoughnessMap = createCanvasRoughnessMap();
+                }
+                if (!sharedEnvironmentMap) {
+                    sharedEnvironmentMap = createEnvironmentMap();
+                }
+                
+                // Utiliser MeshStandardMaterial avec le minimum de textures pour éviter de dépasser la limite WebGL
+                // On utilise seulement map (1 texture par matériau) pour éviter les problèmes de limite
+                // L'envMap est désactivée pour réduire le nombre d'unités de texture utilisées
+                // On simule l'effet de reflet avec une rugosité réduite
+                const frontMaterial = new THREE.MeshStandardMaterial({
+                    map: texture,
+                    side: THREE.FrontSide,
+                    roughness: 0.25, // Rugosité réduite pour simuler le vernis/reflet
+                    metalness: 0.0
+                    // Pas d'envMap pour économiser une unité de texture
+                });
                 
                 const backMaterial = new THREE.MeshStandardMaterial({
                     color: 0xd4c4b0,
@@ -1189,20 +1177,33 @@ function positionPaintings() {
 // Fonction pour configurer l'éclairage
 function setupLights(configName) {
     // Nettoyer les lumières existantes
-    spotLights.forEach(light => scene.remove(light));
-    lightHelpers.forEach(helper => scene.remove(helper));
+    spotLights.forEach(light => {
+        scene.remove(light);
+        if (light.target) scene.remove(light.target);
+    });
+    spotHelpers.forEach(helper => scene.remove(helper));
     spotLights = [];
     spotHelpers = [];
     
     if (ambientLight) scene.remove(ambientLight);
-    if (fillLight) scene.remove(fillLight);
-    if (directionalLight) scene.remove(directionalLight);
+    fillLights.forEach(light => scene.remove(light));
+    fillLights = [];
+    fillLight = null; // Réinitialiser pour compatibilité
+    if (directionalLight) {
+        scene.remove(directionalLight);
+        if (directionalLight.target) scene.remove(directionalLight.target);
+    }
     if (areaLight) scene.remove(areaLight);
     
     const config = lightConfigurations[configName];
     if (!config) return;
     
     currentLightConfigName = configName;
+    
+    const roomWidth = 60;
+    const roomDepth = 50;
+    const ceilingHeight = 6;
+    const paintingHeight = 1.5;
     
     // Lumière ambiante
     if (config.ambientLight && config.ambientLight.enabled) {
@@ -1213,48 +1214,116 @@ function setupLights(configName) {
         scene.add(ambientLight);
     }
     
-    // Lumière de remplissage
+    // Lumière de remplissage - Point lights stratégiques pour éclairer toute la salle
     if (config.fillLight && config.fillLight.enabled) {
-        fillLight = new THREE.PointLight(
-            config.fillLight.color,
-            config.fillLight.intensity,
-            80 // Portée adaptée à la salle agrandie
-        );
-        fillLight.position.set(
-            config.fillLight.position.x,
-            config.fillLight.position.y,
-            config.fillLight.position.z
-        );
-        fillLight.castShadow = true;
-        scene.add(fillLight);
+        // Utiliser plusieurs point lights positionnées stratégiquement pour couvrir toute la salle
+        // sans avoir besoin de trop de spots avec ombres (coûteux en performance)
+        const fillLightPositions = [
+            { x: -15, y: ceilingHeight, z: -12.5 },
+            { x: 15, y: ceilingHeight, z: -12.5 },
+            { x: -15, y: ceilingHeight, z: 12.5 },
+            { x: 15, y: ceilingHeight, z: 12.5 }
+        ];
+        
+        fillLightPositions.forEach((pos, index) => {
+            const pointLight = new THREE.PointLight(
+                config.fillLight.color,
+                config.fillLight.intensity * 0.4, // Réduire l'intensité car on en a plusieurs
+                100 // Grande portée pour couvrir toute la salle
+            );
+            pointLight.position.set(pos.x, pos.y, pos.z);
+            pointLight.castShadow = false; // Pas d'ombres pour les performances
+            scene.add(pointLight);
+            fillLights.push(pointLight);
+            
+            // Stocker la première comme fillLight principale pour compatibilité avec le code existant
+            if (index === 0) {
+                fillLight = pointLight;
+            }
+        });
     }
     
-    // Spots
+    // Spots - Optimisé pour la grande salle avec performance en tête
     if (config.spots && config.spots.enabled) {
-        const numSpots = config.spots.count || 3;
-        const spacing = config.spots.spacing || 0.8;
-        const startX = -(numSpots - 1) * spacing / 2;
+        // Positionner les spots pour éclairer chaque tableau individuellement
+        // Vérifier que les tableaux sont chargés
+        const loadedPaintings = paintings.filter(p => p !== null);
         
-        for (let i = 0; i < numSpots; i++) {
+        if (loadedPaintings.length === 0) {
+            // Si aucun tableau n'est chargé, utiliser un éclairage par défaut
+            // (peut arriver lors d'un changement de configuration avant le chargement)
+            console.warn('Aucun tableau chargé, utilisation de l\'éclairage par défaut');
+            return;
+        }
+        
+        // Limiter le nombre de spots avec ombres pour les performances
+        const maxShadowSpots = Math.min(12, loadedPaintings.length);
+        let shadowSpotCount = 0;
+        
+        // Parcourir tous les tableaux chargés et créer des spots pour chacun
+        loadedPaintings.forEach((painting, index) => {
+            if (!painting) return; // Ignorer les tableaux non encore chargés
+            
+            const paintingPos = painting.position.clone();
+            const paintingRot = painting.rotation.y;
+            
+            // Calculer la position du spot au plafond selon l'orientation du tableau
+            let spotX, spotZ, targetX, targetZ;
+            const spotDistanceFromWall = 0.6; // Distance du spot par rapport au mur
+            
+            if (Math.abs(paintingRot - Math.PI / 2) < 0.1) {
+                // Mur gauche : spot à droite du tableau
+                spotX = paintingPos.x + spotDistanceFromWall;
+                spotZ = paintingPos.z;
+                targetX = paintingPos.x;
+                targetZ = paintingPos.z;
+            } else if (Math.abs(paintingRot + Math.PI / 2) < 0.1) {
+                // Mur droit : spot à gauche du tableau
+                spotX = paintingPos.x - spotDistanceFromWall;
+                spotZ = paintingPos.z;
+                targetX = paintingPos.x;
+                targetZ = paintingPos.z;
+            } else if (Math.abs(paintingRot - Math.PI) < 0.1 || Math.abs(paintingRot + Math.PI) < 0.1) {
+                // Mur avant : spot derrière le tableau
+                spotX = paintingPos.x;
+                spotZ = paintingPos.z - spotDistanceFromWall;
+                targetX = paintingPos.x;
+                targetZ = paintingPos.z;
+            } else {
+                // Mur arrière : spot devant le tableau
+                spotX = paintingPos.x;
+                spotZ = paintingPos.z + spotDistanceFromWall;
+                targetX = paintingPos.x;
+                targetZ = paintingPos.z;
+            }
+            
+            // Créer le spot
             const spot = new THREE.SpotLight(
                 config.spots.colorTemperature,
-                config.spots.defaultIntensity,
-                config.spots.distance,
-                Math.tan(config.spots.beamAngle) * config.spots.distance,
+                config.spots.defaultIntensity * 1.2,
+                config.spots.distance * 1.5,
+                Math.tan(config.spots.beamAngle) * config.spots.distance * 1.5,
                 config.spots.penumbra,
                 config.spots.decay
             );
             
-            const x = startX + i * spacing;
-            const roomDepth = 50; // Profondeur de la salle agrandie
-            spot.position.set(x, 5, -18); // Position ajustée pour la salle agrandie
-            spot.target.position.set(x, 1.5, -roomDepth / 2);
-            spot.castShadow = true;
-            spot.shadow.mapSize.width = 4096;
-            spot.shadow.mapSize.height = 4096;
-            spot.shadow.bias = -0.0001;
-            spot.shadow.normalBias = 0.02;
-            spot.shadow.radius = 6;
+            // Positionner le spot au plafond, légèrement en avant du mur
+            spot.position.set(spotX, ceilingHeight, spotZ);
+            // Cibler le centre du tableau
+            spot.target.position.set(targetX, paintingHeight, targetZ);
+            
+            // Seulement quelques spots projettent des ombres pour les performances
+            if (shadowSpotCount < maxShadowSpots) {
+                spot.castShadow = true;
+                spot.shadow.mapSize.width = 2048;
+                spot.shadow.mapSize.height = 2048;
+                spot.shadow.bias = -0.0001;
+                spot.shadow.normalBias = 0.02;
+                spot.shadow.radius = 4;
+                shadowSpotCount++;
+            } else {
+                spot.castShadow = false;
+            }
             
             scene.add(spot);
             scene.add(spot.target);
@@ -1263,7 +1332,7 @@ function setupLights(configName) {
             const helper = createLightHelper(spot);
             scene.add(helper);
             spotHelpers.push(helper);
-        }
+        });
         
         animationEnabled = config.spots.animated || false;
     }
@@ -1458,11 +1527,11 @@ async function init() {
         const walls = createGalleryWalls();
         scene.add(walls);
         
-        // Éclairage
-        setupLights('gallery-spots');
-        
-        // Charger les tableaux
+        // Charger les tableaux d'abord, puis configurer l'éclairage
         positionPaintings().then(() => {
+            // Éclairage configuré après le chargement des tableaux pour pouvoir les cibler
+            setupLights('gallery-spots');
+            
             document.getElementById('loading').style.display = 'none';
             updateCurrentPaintingDisplay();
             animate();
@@ -1523,7 +1592,10 @@ function setupEventListeners() {
         spotOnlyMode = e.target.checked;
         if (spotOnlyMode) {
             if (ambientLight) ambientLight.intensity = 0;
-            if (fillLight) fillLight.intensity = 0;
+            // Éteindre toutes les fill lights
+            fillLights.forEach(light => {
+                light.intensity = 0;
+            });
             spotLights.forEach(spot => {
                 spot.intensity *= 2;
             });
@@ -1532,13 +1604,17 @@ function setupEventListeners() {
             if (ambientLight && config.ambientLight) {
                 ambientLight.intensity = config.ambientLight.intensity;
             }
-            if (fillLight && config.fillLight) {
-                fillLight.intensity = config.fillLight.intensity;
+            // Rétablir toutes les fill lights
+            if (config.fillLight && config.fillLight.enabled) {
+                const baseIntensity = config.fillLight.intensity * 0.4;
+                fillLights.forEach(light => {
+                    light.intensity = baseIntensity;
+                });
             }
             spotLights.forEach((spot, index) => {
                 const config = lightConfigurations[currentLightConfigName];
                 if (config.spots) {
-                    spot.intensity = config.spots.defaultIntensity;
+                    spot.intensity = config.spots.defaultIntensity * 1.2; // Intensité adaptée à la grande salle
                 }
             });
         }
@@ -1568,26 +1644,84 @@ function animate() {
     
     // Animation des spots si activée
     if (animationEnabled) {
-        animationTime += 0.01;
-        spotLights.forEach((spot, index) => {
-            const radius = 3;
-            const angle = animationTime + (index * Math.PI * 2 / spotLights.length);
-            spot.position.x = Math.cos(angle) * radius;
-            spot.position.z = -8 + Math.sin(angle) * radius;
-            spot.target.position.x = spot.position.x;
+        const config = lightConfigurations[currentLightConfigName];
+        const animationType = config?.spots?.animationType || 'show';
+        
+        if (animationType === 'caterpillar') {
+            // Animation chenille : les spots s'allument et s'éteignent séquentiellement
+            animationTime += 0.015; // Vitesse de l'animation
+            const cycleDuration = 4; // Durée d'un cycle complet (en secondes)
+            const totalSpots = spotLights.length;
             
-            const hue = (animationTime * 50 + index * 60) % 360;
-            spot.color.setHSL(hue / 360, 0.7, 0.6);
-            
-            spot.intensity = 0.3 + Math.sin(animationTime * 2 + index) * 0.2;
-            
-            // Mettre à jour le helper
-            if (spotHelpers[index]) {
-                scene.remove(spotHelpers[index]);
-                spotHelpers[index] = createLightHelper(spot);
-                scene.add(spotHelpers[index]);
-            }
-        });
+            spotLights.forEach((spot, index) => {
+                // Calculer la phase de chaque spot (décalage dans le cycle)
+                const phase = (animationTime + (index / totalSpots) * cycleDuration) % cycleDuration;
+                
+                // Fonction d'intensité : monte, reste allumé, puis descend
+                let intensity = 0;
+                if (phase < 0.5) {
+                    // Montée : 0 à 1 sur 0.5 secondes
+                    intensity = phase * 2;
+                } else if (phase < 1.5) {
+                    // Allumé : reste à 1 pendant 1 seconde
+                    intensity = 1.0;
+                } else if (phase < 2.0) {
+                    // Descente : 1 à 0 sur 0.5 secondes
+                    intensity = 1.0 - (phase - 1.5) * 2;
+                } else {
+                    // Éteint : reste à 0 pendant 2 secondes
+                    intensity = 0.0;
+                }
+                
+                // Appliquer l'intensité avec un peu de variation pour plus de réalisme
+                const baseIntensity = config.spots.defaultIntensity * 1.2;
+                spot.intensity = intensity * baseIntensity;
+                
+                // Légère variation de couleur pour l'effet
+                if (intensity > 0.1) {
+                    const colorVariation = Math.sin(phase * Math.PI * 2) * 0.05;
+                    const r = ((config.spots.colorTemperature >> 16) & 0xff) / 255;
+                    const g = ((config.spots.colorTemperature >> 8) & 0xff) / 255;
+                    const b = (config.spots.colorTemperature & 0xff) / 255;
+                    spot.color.setRGB(
+                        Math.max(0, Math.min(1, r + colorVariation)),
+                        Math.max(0, Math.min(1, g + colorVariation * 0.5)),
+                        Math.max(0, Math.min(1, b + colorVariation * 0.3))
+                    );
+                } else {
+                    spot.color.setHex(config.spots.colorTemperature);
+                }
+                
+                // Mettre à jour le helper avec la nouvelle couleur et opacité
+                if (spotHelpers[index]) {
+                    scene.remove(spotHelpers[index]);
+                    spotHelpers[index] = createLightHelper(spot);
+                    scene.add(spotHelpers[index]);
+                }
+            });
+        } else {
+            // Animation "show" originale (spectacle animé)
+            animationTime += 0.01;
+            spotLights.forEach((spot, index) => {
+                const radius = 3;
+                const angle = animationTime + (index * Math.PI * 2 / spotLights.length);
+                spot.position.x = Math.cos(angle) * radius;
+                spot.position.z = -8 + Math.sin(angle) * radius;
+                spot.target.position.x = spot.position.x;
+                
+                const hue = (animationTime * 50 + index * 60) % 360;
+                spot.color.setHSL(hue / 360, 0.7, 0.6);
+                
+                spot.intensity = 0.3 + Math.sin(animationTime * 2 + index) * 0.2;
+                
+                // Mettre à jour le helper
+                if (spotHelpers[index]) {
+                    scene.remove(spotHelpers[index]);
+                    spotHelpers[index] = createLightHelper(spot);
+                    scene.add(spotHelpers[index]);
+                }
+            });
+        }
     }
     
     renderer.render(scene, camera);
