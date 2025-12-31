@@ -17,6 +17,9 @@
         }
     }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -45,6 +48,15 @@
             font-size: 1.5em;
             color: #ffd700;
             z-index: 1000;
+            font-family: 'Bebas Neue', 'Cinzel', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+            text-align: center;
+            width: auto;
+            max-width: 90vw;
+            overflow: visible;
+            text-overflow: clip;
+            font-weight: 400;
         }
 
         .gallery-close {
@@ -89,6 +101,9 @@
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
             color: #ffd700;
+            font-family: 'Bebas Neue', 'Cinzel', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            letter-spacing: 0.08em;
+            font-weight: 400;
         }
 
         .gallery-info p {
@@ -123,6 +138,9 @@
             font-size: 1rem;
             margin-bottom: 0.75rem;
             color: #ffd700;
+            font-family: 'Bebas Neue', 'Cinzel', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            letter-spacing: 0.08em;
+            font-weight: 400;
         }
 
         .slider-group {
@@ -216,17 +234,19 @@
                         Éteint la lumière ambiante pour magnifier le tableau
                     </div>
                 </div>
+                <div class="slider-group">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span>Afficher les helpers</span>
+                        <input type="checkbox" id="show-helpers-toggle" style="width: auto; margin-left: 10px; cursor: pointer;">
+                    </label>
+                    <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">
+                        Affiche les visualisations des sources de lumière
+                    </div>
+                </div>
             </div>
         <div class="gallery-info" id="gallery-info" style="display: none;">
             <h2 id="artwork-title"></h2>
             <p id="artwork-artist"></p>
-            <div class="info-text">
-                <strong>Contrôles :</strong><br>
-                • Clic gauche + glisser : rotation de la caméra<br>
-                • Molette : zoom<br>
-                • Clic droit + glisser : déplacer la vue<br>
-                • ESC : fermer la galerie
-            </div>
         </div>
     </div>
 

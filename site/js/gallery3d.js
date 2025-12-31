@@ -14,8 +14,10 @@ let centerHelper, boundingBoxHelper;
 let lightHelpers = [];
 let spotLights = []; // Tableau pour stocker tous les spots
 let spotHelpers = []; // Tableau pour stocker les helpers des spots (pour animation)
+let spotMeshes = []; // Objets 3D visibles représentant les spots au plafond
 let ambientLight = null; // Lumière ambiante (pour pouvoir l'éteindre)
 let spotOnlyMode = false; // Mode "spots uniquement"
+let showHelpers = false; // Afficher les helpers (masqués par défaut)
 let currentLightConfigName = 'gallery-spots'; // Configuration d'éclairage active
 let directionalLight = null; // Lumière directionnelle (pour config jour)
 let areaLight = null; // Lumière de zone (pour config jour)
@@ -167,6 +169,139 @@ function getURLParams() {
         height: params.get('height') || null, // Hauteur en cm
         width: params.get('width') || null    // Largeur en cm
     };
+}
+
+// Fonction pour créer un objet visuel représentant un spot au plafond
+// Échelle réaliste : un spot de galerie fait environ 10-15 cm de diamètre
+function createSpotMesh(position, color) {
+    const spotGroup = new THREE.Group();
+    
+    // Échelle réduite : facteur de 0.5 pour des dimensions réalistes
+    const scale = 0.5;
+    
+    // 1. Base de fixation au plafond (disque plat) - ~12 cm de diamètre
+    const baseGeometry = new THREE.CylinderGeometry(0.06 * scale, 0.06 * scale, 0.01 * scale, 32);
+    const baseMaterial = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a, // Noir mat pour la base
+        roughness: 0.8,
+        metalness: 0.1
+    });
+    const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    base.position.y = 0.005 * scale; // Juste au-dessus du plafond
+    spotGroup.add(base);
+    
+    // 2. Corps principal du spot (cylindre qui sort du plafond) - ~10-12 cm de diamètre, ~9 cm de hauteur
+    const bodyGeometry = new THREE.CylinderGeometry(0.05 * scale, 0.06 * scale, 0.09 * scale, 32);
+    const bodyMaterial = new THREE.MeshStandardMaterial({
+        color: 0x2a2a2a, // Gris foncé métallique
+        roughness: 0.2,
+        metalness: 0.8
+    });
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.position.y = -0.04 * scale; // Positionner dans le plafond
+    spotGroup.add(body);
+    
+    // 3. Réflecteur/parabole (forme conique évasée) - ~7 cm de diamètre, ~6 cm de hauteur
+    const reflectorGeometry = new THREE.ConeGeometry(0.07 * scale, 0.06 * scale, 32, 1, true);
+    const reflectorMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff, // Blanc brillant pour le réflecteur
+        roughness: 0.1,
+        metalness: 0.9,
+        envMapIntensity: 1.0
+    });
+    const reflector = new THREE.Mesh(reflectorGeometry, reflectorMaterial);
+    reflector.rotation.x = Math.PI; // Inversé pour être orienté vers le bas
+    reflector.position.y = -0.10 * scale; // Sous le corps
+    spotGroup.add(reflector);
+    
+    // 4. Anneau de finition entre le corps et le réflecteur
+    const ringGeometry = new THREE.TorusGeometry(0.06 * scale, 0.005 * scale, 16, 32);
+    const ringMaterial = new THREE.MeshStandardMaterial({
+        color: 0x3a3a3a, // Gris moyen
+        roughness: 0.3,
+        metalness: 0.6
+    });
+    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = -0.10 * scale;
+    spotGroup.add(ring);
+    
+    // 5. Source lumineuse principale (disque émissif au centre) - ~4 cm de diamètre
+    const lightGeometry = new THREE.CircleGeometry(0.04 * scale, 32);
+    const lightMaterial = new THREE.MeshStandardMaterial({
+        color: color,
+        side: THREE.DoubleSide,
+        emissive: color,
+        emissiveIntensity: 1.2
+    });
+    const lightDisk = new THREE.Mesh(lightGeometry, lightMaterial);
+    lightDisk.rotation.x = -Math.PI / 2; // Face vers le bas
+    lightDisk.position.y = -0.13 * scale; // Au centre du réflecteur
+    spotGroup.add(lightDisk);
+    
+    // 6. Halo lumineux intense autour de la source
+    const haloGeometry = new THREE.RingGeometry(0.04 * scale, 0.06 * scale, 32);
+    const haloMaterial = new THREE.MeshStandardMaterial({
+        color: color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.5,
+        emissive: color,
+        emissiveIntensity: 0.8
+    });
+    const halo = new THREE.Mesh(haloGeometry, haloMaterial);
+    halo.rotation.x = -Math.PI / 2;
+    halo.position.y = -0.13 * scale;
+    spotGroup.add(halo);
+    
+    // 7. Halo externe plus large et plus subtil
+    const outerHaloGeometry = new THREE.RingGeometry(0.06 * scale, 0.09 * scale, 32);
+    const outerHaloMaterial = new THREE.MeshStandardMaterial({
+        color: color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.2,
+        emissive: color,
+        emissiveIntensity: 0.4
+    });
+    const outerHalo = new THREE.Mesh(outerHaloGeometry, outerHaloMaterial);
+    outerHalo.rotation.x = -Math.PI / 2;
+    outerHalo.position.y = -0.13 * scale;
+    spotGroup.add(outerHalo);
+    
+    // 8. Point lumineux central intense (pour effet de brillance) - ~1.5 cm de diamètre
+    const centerGeometry = new THREE.CircleGeometry(0.015 * scale, 16);
+    const centerMaterial = new THREE.MeshStandardMaterial({
+        color: 0xffffff, // Blanc pur au centre
+        side: THREE.DoubleSide,
+        emissive: 0xffffff,
+        emissiveIntensity: 2.0
+    });
+    const center = new THREE.Mesh(centerGeometry, centerMaterial);
+    center.rotation.x = -Math.PI / 2;
+    center.position.y = -0.13 * scale;
+    spotGroup.add(center);
+    
+    // 9. Vis de fixation (petits détails) - ~0.5 cm de diamètre
+    for (let i = 0; i < 4; i++) {
+        const screwGeometry = new THREE.CylinderGeometry(0.005 * scale, 0.005 * scale, 0.01 * scale, 8);
+        const screwMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4a4a4a,
+            roughness: 0.4,
+            metalness: 0.7
+        });
+        const screw = new THREE.Mesh(screwGeometry, screwMaterial);
+        const angle = (i / 4) * Math.PI * 2;
+        screw.position.x = Math.cos(angle) * 0.055 * scale;
+        screw.position.z = Math.sin(angle) * 0.055 * scale;
+        screw.position.y = 0.01 * scale;
+        spotGroup.add(screw);
+    }
+    
+    // Positionner le groupe au plafond
+    spotGroup.position.copy(position);
+    
+    return spotGroup;
 }
 
 // Fonction pour créer un helper de lumière
@@ -329,6 +464,8 @@ function setupLights(configName = 'gallery-spots') {
     lightHelpers = [];
     spotHelpers = []; // Réinitialiser aussi le tableau des helpers de spots
     spotLights = []; // Réinitialiser le tableau des spots
+    spotMeshes.forEach(mesh => scene.remove(mesh));
+    spotMeshes = []; // Réinitialiser le tableau des spots visibles
     
     // Supprimer les anciennes lumières de la scène
     if (fillLight) {
@@ -358,79 +495,114 @@ function setupLights(configName = 'gallery-spots') {
     currentLightConfigName = configName;
     
     // Paramètres constants de la scène
-    const ceilingHeight = 6; // Hauteur du plafond
+    const ceilingHeight = 3; // Hauteur du plafond à 3m
     const paintingCenterY = 1.5; // Hauteur du centre du tableau
     const paintingZ = -7.5; // Position Z du tableau (contre le mur)
+    
+    // Obtenir les dimensions réelles du tableau depuis userData si disponible
+    let paintingActualHeight = 2.0; // Fallback à 2m si non défini
+    let paintingActualWidth = 2.5; // Fallback à 2.5m si non défini
+    if (painting && painting.userData && painting.userData.paintingHeight) {
+        paintingActualHeight = painting.userData.paintingHeight;
+    }
+    if (painting && painting.userData && painting.userData.paintingWidth) {
+        paintingActualWidth = painting.userData.paintingWidth;
+    }
+    const paintingTopY = paintingCenterY + paintingActualHeight / 2; // Position du haut du tableau
+    const constantDistanceFromTop = 1.2; // Distance constante du haut du tableau (1.2m)
     
     // Créer les spots si activés
     if (config.spots && config.spots.enabled) {
         const spotsConfig = config.spots;
-        const numSpots = spotsConfig.count;
         
-        // Vérifier si des positions personnalisées sont définies
-        const hasCustomPositions = spotsConfig.customPositions && spotsConfig.customPositions.length === numSpots;
-        const hasCustomTargets = spotsConfig.customTargets && spotsConfig.customTargets.length === numSpots;
+        // Positionnement optimal selon les meilleures pratiques muséales :
+        // - Angle d'incidence de 30° par rapport à la verticale
+        // - 2 spots symétriques de chaque côté pour réduire les ombres
+        // - Distance adaptée pour un éclairage uniforme
+        const optimalAngle = 30 * Math.PI / 180; // 30° en radians
+        const optimalBeamAngle = 12 * Math.PI / 180; // Angle de faisceau optimal
         
-        for (let i = 0; i < numSpots; i++) {
-            let spotX, spotY, spotZ;
-            let targetX, targetY, targetZ;
+        // Distance horizontale depuis le centre du tableau pour obtenir l'angle de 30°
+        const distanceFromCenter = (ceilingHeight - paintingCenterY) * Math.tan(optimalAngle);
+        
+        // Espacement horizontal optimal : les spots doivent être positionnés de manière symétrique
+        const spotHorizontalOffset = Math.max(
+            paintingActualWidth * 0.4,
+            distanceFromCenter * 0.8
+        );
+        
+        // Distance du mur pour le spot
+        const spotDistanceFromWall = Math.max(0.5, distanceFromCenter * 0.6);
+        
+        // Calculer la position Y du spot pour maintenir une distance constante du haut du tableau
+        let spotY = paintingTopY + constantDistanceFromTop;
+        // S'assurer que le spot ne dépasse pas le plafond
+        spotY = Math.min(spotY, ceilingHeight - 0.1);
+        
+        // Créer 2 spots (un de chaque côté du tableau)
+        for (let spotIndex = 0; spotIndex < 2; spotIndex++) {
+            // Position X : symétrique par rapport au centre du tableau
+            const spotX = spotIndex === 0 ? -spotHorizontalOffset : spotHorizontalOffset;
             
-            if (hasCustomPositions && hasCustomTargets) {
-                // Utiliser les positions et cibles personnalisées
-                spotX = spotsConfig.customPositions[i].x;
-                spotY = spotsConfig.customPositions[i].y;
-                spotZ = spotsConfig.customPositions[i].z;
-                targetX = spotsConfig.customTargets[i].x;
-                targetY = spotsConfig.customTargets[i].y;
-                targetZ = spotsConfig.customTargets[i].z;
-            } else {
-                // Calculer les positions selon le schéma standard
-                const totalWidth = (numSpots - 1) * spotsConfig.spacing;
-                const startX = -totalWidth / 2;
-                spotX = startX + i * spotsConfig.spacing;
-                spotY = ceilingHeight;
-                spotZ = paintingZ + spotsConfig.distanceFromWall + 
-                         (ceilingHeight - paintingCenterY) * Math.tan(spotsConfig.angle);
-                targetX = spotX;
-                targetY = paintingCenterY;
-                targetZ = paintingZ;
-            }
+            // Position Z : devant le tableau avec la distance optimale
+            const spotZ = paintingZ + spotDistanceFromWall;
+            
+            // Cible : centre du tableau
+            const targetX = 0;
+            const targetY = paintingCenterY;
+            const targetZ = paintingZ;
+            
+            // Intensité de base multipliée par 2.5 pour plus de puissance
+            const baseIntensity = (spotsConfig.defaultIntensity || 1.0) * 2.5;
             
             const spot = new THREE.SpotLight(
                 spotsConfig.colorTemperature,
-                spotsConfig.defaultIntensity,
-                spotsConfig.distance,
-                spotsConfig.beamAngle,
-                spotsConfig.penumbra,
-                spotsConfig.decay
+                baseIntensity,
+                spotsConfig.distance || 20,
+                optimalBeamAngle,
+                spotsConfig.penumbra || 0.3,
+                spotsConfig.decay || 1.5
             );
             spot.position.set(spotX, spotY, spotZ);
             spot.target.position.set(targetX, targetY, targetZ);
-            spot.castShadow = true;
+            
+            // Seul le premier spot projette des ombres pour la performance
+            spot.castShadow = (spotIndex === 0);
             
             // Configuration optimale des ombres pour spots
-            spot.shadow.mapSize.width = 4096;
-            spot.shadow.mapSize.height = 4096;
-            spot.shadow.camera.near = 0.1;
-            spot.shadow.camera.far = 20;
-            spot.shadow.bias = -0.0001; // Bias ajusté pour éviter les artefacts
-            spot.shadow.normalBias = 0.02; // Normal bias pour surfaces inclinées
-            spot.shadow.radius = 8; // Ombres plus douces
-            spot.shadow.blurSamples = 25; // Plus d'échantillons pour qualité
-            // Ajuster la caméra d'ombre pour couvrir la zone éclairée
-            spot.shadow.camera.fov = 50; // Champ de vision adapté au faisceau
-            spot.shadow.camera.updateProjectionMatrix();
+            if (spot.castShadow) {
+                spot.shadow.mapSize.width = 4096;
+                spot.shadow.mapSize.height = 4096;
+                spot.shadow.camera.near = 0.1;
+                spot.shadow.camera.far = 20;
+                spot.shadow.bias = -0.0001;
+                spot.shadow.normalBias = 0.02;
+                spot.shadow.radius = 8;
+                spot.shadow.blurSamples = 25;
+                spot.shadow.camera.fov = 50;
+                spot.shadow.camera.updateProjectionMatrix();
+            }
             
             scene.add(spot);
             scene.add(spot.target);
             spotLights.push(spot);
             
-            const spotHelper = createLightHelper(spot);
-            scene.add(spotHelper);
-            lightHelpers.push(spotHelper);
-            spotHelpers.push(spotHelper); // Stocker aussi dans le tableau dédié pour animation
+            // Créer le mesh visible du spot
+            const spotMesh = createSpotMesh(
+                new THREE.Vector3(spotX, spotY, spotZ),
+                spotsConfig.colorTemperature
+            );
+            scene.add(spotMesh);
+            spotMeshes.push(spotMesh);
             
-            if (i === 0) {
+            const spotHelper = createLightHelper(spot);
+            if (showHelpers) {
+                scene.add(spotHelper);
+            }
+            lightHelpers.push(spotHelper);
+            spotHelpers.push(spotHelper);
+            
+            if (spotIndex === 0) {
                 mainLight = spot;
             }
         }
@@ -450,7 +622,9 @@ function setupLights(configName = 'gallery-spots') {
         scene.add(fillLight);
         
         const fillLightHelper = createLightHelper(fillLight);
-        scene.add(fillLightHelper);
+        if (showHelpers) {
+            scene.add(fillLightHelper);
+        }
         lightHelpers.push(fillLightHelper);
     }
     
@@ -499,7 +673,9 @@ function setupLights(configName = 'gallery-spots') {
         scene.add(directionalLight.target);
         
         const dirLightHelper = createLightHelper(directionalLight);
-        scene.add(dirLightHelper);
+        if (showHelpers) {
+            scene.add(dirLightHelper);
+        }
         lightHelpers.push(dirLightHelper);
         
         if (!mainLight) {
@@ -529,7 +705,9 @@ function setupLights(configName = 'gallery-spots') {
         
         // Utiliser RectAreaLightHelper pour RectAreaLight
         const areaLightHelper = new RectAreaLightHelper(areaLight);
-        scene.add(areaLightHelper);
+        if (showHelpers) {
+            scene.add(areaLightHelper);
+        }
         lightHelpers.push(areaLightHelper);
         
         // Note: RectAreaLight ne projette pas d'ombres directement dans Three.js
@@ -725,25 +903,114 @@ function updateHelpers() {
         const roomSize = 15;
         centerHelper.position.set(0, 1.5, -roomSize / 2 + 0.05);
     }
-    scene.add(centerHelper);
+    // Ajouter à la scène seulement si les helpers sont activés
+    if (showHelpers) {
+        scene.add(centerHelper);
+    }
     
     // Créer le helper de la bounding box
     if (painting) {
         boundingBoxHelper = createBoundingBoxHelper(painting);
-        scene.add(boundingBoxHelper);
+        // Ajouter à la scène seulement si les helpers sont activés
+        if (showHelpers) {
+            scene.add(boundingBoxHelper);
+        }
     }
 }
 
-// Fonction pour créer un cadre autour du tableau
-function createFrame(width, height, depth = 0.1) {
-    const frameGroup = new THREE.Group();
-    const frameMaterial = new THREE.MeshStandardMaterial({
-        color: 0x8b7355, // Couleur bois doré
+// Styles de cadres réalistes
+const frameStyles = {
+    classic_gold: {
+        color: 0xd4af37, // Or classique
+        roughness: 0.3,
+        metalness: 0.8,
+        envMapIntensity: 0.5,
+        depth: 0.12,
+        name: 'Classique doré'
+    },
+    dark_wood: {
+        color: 0x3d2817, // Bois foncé
+        roughness: 0.8,
+        metalness: 0.0,
+        envMapIntensity: 0.2,
+        depth: 0.1,
+        name: 'Bois foncé'
+    },
+    light_wood: {
+        color: 0xd4a574, // Bois clair
+        roughness: 0.7,
+        metalness: 0.0,
+        envMapIntensity: 0.2,
+        depth: 0.1,
+        name: 'Bois clair'
+    },
+    ornate_gold: {
+        color: 0xffd700, // Or brillant
+        roughness: 0.2,
+        metalness: 0.9,
+        envMapIntensity: 0.6,
+        depth: 0.15,
+        name: 'Orné doré'
+    },
+    black_modern: {
+        color: 0x1a1a1a, // Noir moderne
+        roughness: 0.4,
+        metalness: 0.1,
+        envMapIntensity: 0.3,
+        depth: 0.08,
+        name: 'Moderne noir'
+    },
+    mahogany: {
+        color: 0x8b4513, // Acajou
         roughness: 0.6,
-        metalness: 0.2
+        metalness: 0.0,
+        envMapIntensity: 0.25,
+        depth: 0.12,
+        name: 'Acajou'
+    },
+    silver: {
+        color: 0xc0c0c0, // Argent
+        roughness: 0.3,
+        metalness: 0.7,
+        envMapIntensity: 0.4,
+        depth: 0.1,
+        name: 'Argent'
+    },
+    walnut: {
+        color: 0x5c4033, // Noyer
+        roughness: 0.7,
+        metalness: 0.0,
+        envMapIntensity: 0.2,
+        depth: 0.11,
+        name: 'Noyer'
+    }
+};
+
+// Fonction pour obtenir un style de cadre aléatoire ou basé sur l'index
+function getFrameStyle(index) {
+    const styleKeys = Object.keys(frameStyles);
+    // Utiliser l'index pour avoir une distribution variée mais déterministe
+    return frameStyles[styleKeys[index % styleKeys.length]];
+}
+
+// Fonction pour créer un cadre avec un style spécifique
+function createFrame(width, height, style = null) {
+    const frameGroup = new THREE.Group();
+    
+    // Si aucun style n'est fourni, utiliser un style par défaut
+    if (!style) {
+        style = frameStyles.dark_wood;
+    }
+    
+    const depth = style.depth || 0.1;
+    const frameMaterial = new THREE.MeshStandardMaterial({
+        color: style.color,
+        roughness: style.roughness,
+        metalness: style.metalness,
+        envMapIntensity: style.envMapIntensity
     });
     
-    // Cadre supérieur
+    // Créer les 4 côtés du cadre
     const topFrame = new THREE.Mesh(
         new THREE.BoxGeometry(width + depth * 2, depth, depth),
         frameMaterial
@@ -753,7 +1020,6 @@ function createFrame(width, height, depth = 0.1) {
     topFrame.receiveShadow = true;
     frameGroup.add(topFrame);
     
-    // Cadre inférieur
     const bottomFrame = new THREE.Mesh(
         new THREE.BoxGeometry(width + depth * 2, depth, depth),
         frameMaterial
@@ -763,7 +1029,6 @@ function createFrame(width, height, depth = 0.1) {
     bottomFrame.receiveShadow = true;
     frameGroup.add(bottomFrame);
     
-    // Cadre gauche
     const leftFrame = new THREE.Mesh(
         new THREE.BoxGeometry(depth, height, depth),
         frameMaterial
@@ -773,7 +1038,6 @@ function createFrame(width, height, depth = 0.1) {
     leftFrame.receiveShadow = true;
     frameGroup.add(leftFrame);
     
-    // Cadre droit
     const rightFrame = new THREE.Mesh(
         new THREE.BoxGeometry(depth, height, depth),
         frameMaterial
@@ -782,6 +1046,29 @@ function createFrame(width, height, depth = 0.1) {
     rightFrame.castShadow = true;
     rightFrame.receiveShadow = true;
     frameGroup.add(rightFrame);
+    
+    // Pour les cadres ornés, ajouter des détails supplémentaires
+    if (style.name === 'Orné doré') {
+        // Ajouter des coins décoratifs
+        const cornerDetail = new THREE.Mesh(
+            new THREE.BoxGeometry(depth * 1.5, depth * 1.5, depth * 1.2),
+            frameMaterial
+        );
+        
+        // 4 coins
+        const corners = [
+            { x: -width / 2 - depth / 2, y: height / 2 + depth / 2 },
+            { x: width / 2 + depth / 2, y: height / 2 + depth / 2 },
+            { x: -width / 2 - depth / 2, y: -height / 2 - depth / 2 },
+            { x: width / 2 + depth / 2, y: -height / 2 - depth / 2 }
+        ];
+        
+        corners.forEach(corner => {
+            const cornerMesh = cornerDetail.clone();
+            cornerMesh.position.set(corner.x, corner.y, 0);
+            frameGroup.add(cornerMesh);
+        });
+    }
     
     return frameGroup;
 }
@@ -954,17 +1241,184 @@ function createGalleryFloor() {
     return floor;
 }
 
+// Fonction pour créer une texture de mur avec relief et nuances
+function createWallTexture() {
+    const size = 1024;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Base blanche
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, size, size);
+    
+    // Ajouter des variations plus visibles de couleur (nuances de blanc/gris clair)
+    const imageData = context.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    // Créer un bruit de Perlin simplifié pour des variations plus naturelles
+    for (let i = 0; i < data.length; i += 4) {
+        const x = (i / 4) % size;
+        const y = Math.floor((i / 4) / size);
+        
+        // Créer des variations avec un pattern plus visible
+        const noise1 = Math.sin(x * 0.01) * Math.cos(y * 0.01) * 5;
+        const noise2 = (Math.random() - 0.5) * 12;
+        const noise = noise1 + noise2;
+        const baseColor = 250;
+        const color = Math.max(235, Math.min(255, baseColor + noise));
+        
+        data[i] = color;     // R
+        data[i + 1] = color; // G
+        data[i + 2] = color; // B
+        data[i + 3] = 255;   // A
+    }
+    
+    context.putImageData(imageData, 0, 0);
+    
+    // Ajouter des motifs plus visibles pour simuler le relief et les imperfections
+    context.globalAlpha = 0.08;
+    for (let i = 0; i < 100; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const radius = 30 + Math.random() * 50;
+        
+        const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.15)');
+        gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.05)');
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        context.fillStyle = gradient;
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fill();
+    }
+    
+    // Ajouter des lignes subtiles pour simuler les joints de plâtre
+    context.globalAlpha = 0.05;
+    context.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+    context.lineWidth = 1;
+    for (let y = 0; y < size; y += 200) {
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(size, y);
+        context.stroke();
+    }
+    
+    context.globalAlpha = 1.0;
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(3, 3); // Répéter la texture sur les murs
+    texture.needsUpdate = true;
+    
+    return texture;
+}
+
+// Fonction pour créer une normal map pour le relief des murs
+function createWallNormalMap() {
+    const size = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Base pour normal map (RGB = 128, 128, 255 = surface plate)
+    context.fillStyle = 'rgb(128, 128, 255)';
+    context.fillRect(0, 0, size, size);
+    
+    const imageData = context.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        const x = (i / 4) % size;
+        const y = Math.floor((i / 4) / size);
+        
+        // Créer des variations plus prononcées pour le relief
+        const noise1 = Math.sin(x * 0.05) * Math.cos(y * 0.05) * 8;
+        const noise2 = (Math.random() - 0.5) * 15;
+        const noise = noise1 + noise2;
+        
+        const baseR = 128;
+        const baseG = 128;
+        const baseB = 255;
+        
+        data[i] = Math.max(115, Math.min(140, baseR + noise));     // R
+        data[i + 1] = Math.max(115, Math.min(140, baseG + noise)); // G
+        data[i + 2] = Math.max(245, Math.min(255, baseB));         // B
+        data[i + 3] = 255;                                          // A
+    }
+    
+    context.putImageData(imageData, 0, 0);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(3, 3);
+    texture.needsUpdate = true;
+    
+    return texture;
+}
+
+// Fonction pour créer une roughness map pour les murs
+function createWallRoughnessMap() {
+    const size = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Base de rugosité moyenne
+    const baseRoughness = 140;
+    context.fillStyle = `rgb(${baseRoughness}, ${baseRoughness}, ${baseRoughness})`;
+    context.fillRect(0, 0, size, size);
+    
+    const imageData = context.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        const roughnessVariation = (Math.random() - 0.5) * 20;
+        const roughness = Math.max(130, Math.min(150, baseRoughness + roughnessVariation));
+        
+        data[i] = roughness;
+        data[i + 1] = roughness;
+        data[i + 2] = roughness;
+        data[i + 3] = 255;
+    }
+    
+    context.putImageData(imageData, 0, 0);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 2);
+    texture.needsUpdate = true;
+    
+    return texture;
+}
+
 // Fonction pour créer les murs de la galerie
 function createGalleryWalls() {
     const wallGroup = new THREE.Group();
-    // Couleur standard de musée : blanc cassé neutre (comme le Louvre, Musée d'Orsay)
-    // 0xf5f5f0 = blanc cassé très légèrement gris, standard pour les musées
+    
+    // Créer les textures pour les murs
+    const wallTexture = createWallTexture();
+    const wallNormalMap = createWallNormalMap();
+    const wallRoughnessMap = createWallRoughnessMap();
+    
+    // Matériau avec textures pour un rendu naturel
     const wallMaterial = new THREE.MeshStandardMaterial({
-        color: 0xf5f5f0, // Blanc cassé neutre standard musée
-        roughness: 0.65, // Surface légèrement matte (plâtre) avec reflets subtils
+        map: wallTexture,
+        normalMap: wallNormalMap,
+        normalScale: new THREE.Vector2(0.8, 0.8), // Relief plus visible pour mieux voir les textures
+        roughnessMap: wallRoughnessMap,
+        color: 0xffffff, // Blanc pur pour les murs de galerie
+        roughness: 0.75,
         metalness: 0.0,
-        envMapIntensity: 0.2, // Reflets très subtils de l'environnement
-        flatShading: false // Smooth shading pour meilleur rendu
+        envMapIntensity: 0.2, // Augmenté pour plus de reflets et visibilité
+        flatShading: false
     });
     
     const wallHeight = 8;
@@ -1005,6 +1459,38 @@ function createGalleryWalls() {
     wallGroup.add(rightWall);
     
     return wallGroup;
+}
+
+// Fonction pour créer le plafond de la galerie
+function createGalleryCeiling() {
+    const roomSize = 15;
+    const ceilingHeight = 3; // Hauteur du plafond à 3m
+    
+    // Créer une texture de plafond (blanc cassé avec légère texture)
+    const ceilingTexture = createWallTexture(); // Réutiliser la texture des murs
+    const ceilingNormalMap = createWallNormalMap(); // Réutiliser la normal map
+    
+    const ceilingMaterial = new THREE.MeshStandardMaterial({
+        map: ceilingTexture,
+        normalMap: ceilingNormalMap,
+        normalScale: new THREE.Vector2(0.4, 0.4), // Relief plus subtil pour le plafond
+        color: 0xfafafa, // Blanc cassé légèrement plus clair que les murs
+        roughness: 0.8,
+        metalness: 0.0,
+        envMapIntensity: 0.1,
+        flatShading: false
+    });
+    
+    const ceiling = new THREE.Mesh(
+        new THREE.PlaneGeometry(roomSize, roomSize),
+        ceilingMaterial
+    );
+    ceiling.rotation.x = Math.PI / 2; // Rotation pour être horizontal
+    ceiling.position.y = ceilingHeight - 2; // Position à 3m de hauteur (sol à y=-2)
+    ceiling.receiveShadow = true;
+    ceiling.castShadow = false; // Le plafond ne projette pas d'ombres
+    
+    return ceiling;
 }
 
 // Fonction pour créer une texture d'environnement réaliste pour les reflets
@@ -1340,8 +1826,15 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                 
                 painting = paintingGroup;
                 
-                // Créer le cadre
-                paintingFrame = createFrame(width, height, 0.15);
+                // Stocker les dimensions réelles dans userData pour le positionnement optimal des spots
+                painting.userData.paintingHeight = height;
+                painting.userData.paintingWidth = width;
+                
+                // Obtenir un style de cadre varié (utiliser un hash simple basé sur les dimensions pour être déterministe)
+                const frameIndex = Math.floor((width * 100 + height * 100) % 8);
+                const frameStyle = getFrameStyle(frameIndex);
+                const frame = createFrame(width, height, frameStyle);
+                paintingFrame = frame;
                 paintingFrame.castShadow = true;
                 paintingFrame.receiveShadow = true;
                 
@@ -1447,7 +1940,7 @@ function init() {
         
         // Tone mapping ACES Filmic pour rendu cinématique réaliste
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.6; // Exposition augmentée pour préserver les couleurs originales
+        renderer.toneMappingExposure = 1.2; // Exposition réduite pour préserver les textures des murs
         
         // Color space et encoding pour meilleure précision des couleurs
         renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -1459,18 +1952,15 @@ function init() {
         controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.minDistance = 1.5; // Permettre de se rapprocher davantage
-        controls.maxDistance = 12; // Permettre de s'éloigner un peu plus
+        controls.minDistance = 0.2; // Distance minimale de 20cm pour ne pas passer de l'autre côté
+        controls.maxDistance = 20; // Permettre de s'éloigner davantage
         controls.enablePan = true;
         controls.panSpeed = 0.8;
         controls.rotateSpeed = 0.5;
-        controls.zoomSpeed = 1.2;
+        controls.zoomSpeed = 3.0; // Zoom beaucoup plus puissant
         // Cibler le centre du tableau sur le mur
         controls.target.set(0, 1.5, -7.5);
         controls.update();
-        
-        // Lumières (configuration par défaut)
-        setupLights(currentLightConfigName);
         
         // Sol de la galerie
         const floor = createGalleryFloor();
@@ -1480,8 +1970,15 @@ function init() {
         const walls = createGalleryWalls();
         scene.add(walls);
         
+        // Plafond de la galerie
+        const ceiling = createGalleryCeiling();
+        scene.add(ceiling);
+        
         // Charger le tableau avec les dimensions réelles
         loadPainting(params.image, realHeight, realWidth).then(() => {
+            // Éclairage configuré APRÈS le chargement du tableau pour pouvoir utiliser les dimensions réelles
+            setupLights(currentLightConfigName);
+            
             // Masquer le loading
             const loadingElement = document.getElementById('loading');
             if (loadingElement) {
@@ -1999,6 +2496,9 @@ function toggleSpotOnlyMode(enabled) {
         if (valueDisplay) {
             valueDisplay.textContent = newIntensity.toFixed(1);
         }
+        
+        // Réduire l'exposition pour plus de contraste en mode spot uniquement
+        renderer.toneMappingExposure = 0.8;
     } else {
         // Mode normal : rallumer la lumière ambiante et la lumière de remplissage
         if (ambientLight && config.ambientLight && config.ambientLight.enabled) {
@@ -2026,6 +2526,47 @@ function toggleSpotOnlyMode(enabled) {
             }
             
             updateLightIntensity(originalIntensity);
+        }
+        
+        // Restaurer l'exposition normale
+        renderer.toneMappingExposure = 1.2;
+    }
+}
+
+// Fonction pour basculer l'affichage des helpers
+function toggleHelpers(enabled) {
+    showHelpers = enabled;
+    
+    // Ajouter ou retirer tous les helpers de lumière de la scène
+    lightHelpers.forEach(helper => {
+        if (enabled) {
+            if (!scene.children.includes(helper)) {
+                scene.add(helper);
+            }
+        } else {
+            scene.remove(helper);
+        }
+    });
+    
+    // Ajouter ou retirer le repère 3D (centerHelper)
+    if (centerHelper) {
+        if (enabled) {
+            if (!scene.children.includes(centerHelper)) {
+                scene.add(centerHelper);
+            }
+        } else {
+            scene.remove(centerHelper);
+        }
+    }
+    
+    // Ajouter ou retirer la bounding box helper
+    if (boundingBoxHelper) {
+        if (enabled) {
+            if (!scene.children.includes(boundingBoxHelper)) {
+                scene.add(boundingBoxHelper);
+            }
+        } else {
+            scene.remove(boundingBoxHelper);
         }
     }
 }
@@ -2071,6 +2612,15 @@ function setupEventListeners() {
     if (spotOnlyToggle) {
         spotOnlyToggle.addEventListener('change', (e) => {
             toggleSpotOnlyMode(e.target.checked);
+        });
+    }
+    
+    // Toggle "afficher les helpers"
+    const showHelpersToggle = document.getElementById('show-helpers-toggle');
+    if (showHelpersToggle) {
+        showHelpersToggle.checked = showHelpers; // Synchroniser avec l'état actuel
+        showHelpersToggle.addEventListener('change', (e) => {
+            toggleHelpers(e.target.checked);
         });
     }
     
