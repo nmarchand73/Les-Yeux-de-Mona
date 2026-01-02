@@ -1230,8 +1230,8 @@ function createGalleryFloor() {
         color: 0xd4c4b0, // Couleur de base (parquet chêne clair)
         roughness: 0.75, // Parquet légèrement mat avec reflets subtils
         metalness: 0.0,
-        envMapIntensity: 0.3, // Reflets subtils de l'environnement
         flatShading: false // Smooth shading pour meilleur rendu
+        // Pas d'envMap pour économiser les uniformes
     });
     
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -1408,17 +1408,16 @@ function createGalleryWalls() {
     const wallNormalMap = createWallNormalMap();
     const wallRoughnessMap = createWallRoughnessMap();
     
-    // Matériau avec textures pour un rendu naturel
+    // Matériau simplifié pour réduire les uniformes WebGL (retrait de roughnessMap et envMap)
     const wallMaterial = new THREE.MeshStandardMaterial({
         map: wallTexture,
         normalMap: wallNormalMap,
         normalScale: new THREE.Vector2(0.8, 0.8), // Relief plus visible pour mieux voir les textures
-        roughnessMap: wallRoughnessMap,
         color: 0xffffff, // Blanc pur pour les murs de galerie
         roughness: 0.75,
         metalness: 0.0,
-        envMapIntensity: 0.2, // Augmenté pour plus de reflets et visibilité
         flatShading: false
+        // Pas de roughnessMap ni envMap pour économiser les uniformes
     });
     
     const wallHeight = 8;
@@ -1466,19 +1465,13 @@ function createGalleryCeiling() {
     const roomSize = 15;
     const ceilingHeight = 3; // Hauteur du plafond à 3m
     
-    // Créer une texture de plafond (blanc cassé avec légère texture)
-    const ceilingTexture = createWallTexture(); // Réutiliser la texture des murs
-    const ceilingNormalMap = createWallNormalMap(); // Réutiliser la normal map
-    
+    // Matériau simplifié sans textures pour réduire les uniformes WebGL
     const ceilingMaterial = new THREE.MeshStandardMaterial({
-        map: ceilingTexture,
-        normalMap: ceilingNormalMap,
-        normalScale: new THREE.Vector2(0.4, 0.4), // Relief plus subtil pour le plafond
-        color: 0xfafafa, // Blanc cassé légèrement plus clair que les murs
-        roughness: 0.8,
+        color: 0xffffff, // Blanc pur
+        roughness: 0.9,
         metalness: 0.0,
-        envMapIntensity: 0.1,
         flatShading: false
+        // Pas de textures pour économiser les uniformes
     });
     
     const ceiling = new THREE.Mesh(
@@ -1486,7 +1479,7 @@ function createGalleryCeiling() {
         ceilingMaterial
     );
     ceiling.rotation.x = Math.PI / 2; // Rotation pour être horizontal
-    ceiling.position.y = ceilingHeight - 2; // Position à 3m de hauteur (sol à y=-2)
+    ceiling.position.y = ceilingHeight; // Position à 3m de hauteur (sol à y=-2)
     ceiling.receiveShadow = true;
     ceiling.castShadow = false; // Le plafond ne projette pas d'ombres
     
@@ -1763,37 +1756,16 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                 // Créer le plan avec la texture
                 const geometry = new THREE.PlaneGeometry(width, height);
                 
-                // Créer les textures de grain de toile
-                const canvasNormalMap = createCanvasNormalMap();
-                const canvasRoughnessMap = createCanvasRoughnessMap();
-                
-                // Créer un matériau personnalisé avec reflet réaliste de vernis/verre
-                // Paramètres optimisés pour simuler un tableau encadré avec verre protecteur
-                // Le matériau simule : toile (avec grain) -> peinture -> vernis/verre (reflets)
-                const frontMaterial = new THREE.MeshPhysicalMaterial({
+                // Matériau simplifié pour réduire les uniformes WebGL
+                // Utilisation de MeshStandardMaterial avec seulement la texture principale
+                // pour éviter de dépasser la limite MAX_FRAGMENT_UNIFORM_VECTORS
+                const frontMaterial = new THREE.MeshStandardMaterial({
                     map: texture, // Texture de l'image du tableau
-                    normalMap: canvasNormalMap, // Normal map pour le grain de la toile
-                    normalScale: new THREE.Vector2(0.8, 0.8), // Intensité du relief augmentée pour être visible de biais
-                    roughnessMap: canvasRoughnessMap, // Carte de rugosité pour variations subtiles
-                    side: THREE.FrontSide, // Face avant uniquement
-                    roughness: 0.4, // Rugosité modérée pour préserver les couleurs
-                    metalness: 0.0,
-                    clearcoat: 0.1, // Vernis très réduit pour préserver les couleurs originales
-                    clearcoatRoughness: 0.3, // Vernis rugueux pour moins d'atténuation
-                    clearcoatNormalMap: canvasNormalMap, // Le vernis suit aussi le grain de la toile
-                    clearcoatNormalScale: new THREE.Vector2(0.5, 0.5), // Relief modéré
-                    reflectivity: 0.1, // Réflexion très réduite pour préserver les couleurs
-                    envMapIntensity: 0.15, // Intensité très réduite pour préserver les couleurs
-                    ior: 1.5, // Indice de réfraction du verre (standard pour verre/vernis)
-                    transmission: 0.0, // Pas de transmission (tableau opaque)
-                    thickness: 0.0 // Pas d'épaisseur (surface plane)
+                    side: THREE.FrontSide,
+                    roughness: 0.25, // Rugosité réduite pour simuler le vernis/reflet
+                    metalness: 0.0
+                    // Pas de normalMap, roughnessMap, clearcoat, ni envMap pour économiser les uniformes
                 });
-                
-                // Créer l'environnement map pour les reflets (très subtil pour préserver les couleurs)
-                const envMap = createEnvironmentMap();
-                if (envMap) {
-                    frontMaterial.envMap = envMap;
-                }
                 
                 // Créer le matériau pour le dos du tableau (opaque, couleur toile/bois)
                 const backMaterial = new THREE.MeshStandardMaterial({

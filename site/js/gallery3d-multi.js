@@ -28,6 +28,11 @@ let sharedCanvasNormalMap = null;
 let sharedCanvasRoughnessMap = null;
 let sharedEnvironmentMap = null;
 
+// Matériaux partagés pour les spots (pour réduire les uniformes WebGL)
+let sharedSpotMaterials = null;
+// Matériau partagé pour le dos des tableaux
+let sharedBackMaterial = null;
+
 // Configurations d'éclairage (réutilisées depuis gallery3d.js)
 const lightConfigurations = {
     'gallery-spots': {
@@ -201,6 +206,44 @@ async function getFilteredArtworks() {
 // Fonction pour créer un objet visuel représentant un spot au plafond
 // Échelle réaliste : un spot de galerie fait environ 10-15 cm de diamètre
 function createSpotMesh(position, color) {
+    // Initialiser les matériaux partagés une seule fois pour tous les spots
+    if (!sharedSpotMaterials) {
+        sharedSpotMaterials = {
+            base: new THREE.MeshStandardMaterial({
+                color: 0x1a1a1a,
+                roughness: 0.8,
+                metalness: 0.1
+            }),
+            body: new THREE.MeshStandardMaterial({
+                color: 0x2a2a2a,
+                roughness: 0.2,
+                metalness: 0.8
+            }),
+            reflector: new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                roughness: 0.1,
+                metalness: 0.9
+                // Pas d'envMapIntensity pour économiser les uniformes
+            }),
+            ring: new THREE.MeshStandardMaterial({
+                color: 0x3a3a3a,
+                roughness: 0.3,
+                metalness: 0.6
+            }),
+            center: new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                side: THREE.DoubleSide,
+                emissive: 0xffffff,
+                emissiveIntensity: 2.0
+            }),
+            screw: new THREE.MeshStandardMaterial({
+                color: 0x4a4a4a,
+                roughness: 0.4,
+                metalness: 0.7
+            })
+        };
+    }
+    
     const spotGroup = new THREE.Group();
     
     // Échelle réduite : facteur de 0.5 pour des dimensions réalistes
@@ -208,52 +251,32 @@ function createSpotMesh(position, color) {
     
     // 1. Base de fixation au plafond (disque plat) - ~12 cm de diamètre
     const baseGeometry = new THREE.CylinderGeometry(0.06 * scale, 0.06 * scale, 0.01 * scale, 32);
-    const baseMaterial = new THREE.MeshStandardMaterial({
-        color: 0x1a1a1a, // Noir mat pour la base
-        roughness: 0.8,
-        metalness: 0.1
-    });
-    const base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.position.y = 0.005 * scale; // Juste au-dessus du plafond
+    const base = new THREE.Mesh(baseGeometry, sharedSpotMaterials.base);
+    base.position.y = 0.005 * scale;
     spotGroup.add(base);
     
     // 2. Corps principal du spot (cylindre qui sort du plafond) - ~10-12 cm de diamètre, ~9 cm de hauteur
     const bodyGeometry = new THREE.CylinderGeometry(0.05 * scale, 0.06 * scale, 0.09 * scale, 32);
-    const bodyMaterial = new THREE.MeshStandardMaterial({
-        color: 0x2a2a2a, // Gris foncé métallique
-        roughness: 0.2,
-        metalness: 0.8
-    });
-    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    body.position.y = -0.04 * scale; // Positionner dans le plafond
+    const body = new THREE.Mesh(bodyGeometry, sharedSpotMaterials.body);
+    body.position.y = -0.04 * scale;
     spotGroup.add(body);
     
     // 3. Réflecteur/parabole (forme conique évasée) - ~7 cm de diamètre, ~6 cm de hauteur
     const reflectorGeometry = new THREE.ConeGeometry(0.07 * scale, 0.06 * scale, 32, 1, true);
-    const reflectorMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff, // Blanc brillant pour le réflecteur
-        roughness: 0.1,
-        metalness: 0.9,
-        envMapIntensity: 1.0
-    });
-    const reflector = new THREE.Mesh(reflectorGeometry, reflectorMaterial);
-    reflector.rotation.x = Math.PI; // Inversé pour être orienté vers le bas
-    reflector.position.y = -0.10 * scale; // Sous le corps
+    const reflector = new THREE.Mesh(reflectorGeometry, sharedSpotMaterials.reflector);
+    reflector.rotation.x = Math.PI;
+    reflector.position.y = -0.10 * scale;
     spotGroup.add(reflector);
     
     // 4. Anneau de finition entre le corps et le réflecteur
     const ringGeometry = new THREE.TorusGeometry(0.06 * scale, 0.005 * scale, 16, 32);
-    const ringMaterial = new THREE.MeshStandardMaterial({
-        color: 0x3a3a3a, // Gris moyen
-        roughness: 0.3,
-        metalness: 0.6
-    });
-    const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+    const ring = new THREE.Mesh(ringGeometry, sharedSpotMaterials.ring);
     ring.rotation.x = Math.PI / 2;
     ring.position.y = -0.10 * scale;
     spotGroup.add(ring);
     
     // 5. Source lumineuse principale (disque émissif au centre) - ~4 cm de diamètre
+    // Matériau unique par spot pour la couleur (mais partagé pour les autres propriétés)
     const lightGeometry = new THREE.CircleGeometry(0.04 * scale, 32);
     const lightMaterial = new THREE.MeshStandardMaterial({
         color: color,
@@ -262,8 +285,8 @@ function createSpotMesh(position, color) {
         emissiveIntensity: 1.2
     });
     const lightDisk = new THREE.Mesh(lightGeometry, lightMaterial);
-    lightDisk.rotation.x = -Math.PI / 2; // Face vers le bas
-    lightDisk.position.y = -0.13 * scale; // Au centre du réflecteur
+    lightDisk.rotation.x = -Math.PI / 2;
+    lightDisk.position.y = -0.13 * scale;
     spotGroup.add(lightDisk);
     
     // 6. Halo lumineux intense autour de la source
@@ -298,13 +321,7 @@ function createSpotMesh(position, color) {
     
     // 8. Point lumineux central intense (pour effet de brillance) - ~1.5 cm de diamètre
     const centerGeometry = new THREE.CircleGeometry(0.015 * scale, 16);
-    const centerMaterial = new THREE.MeshStandardMaterial({
-        color: 0xffffff, // Blanc pur au centre
-        side: THREE.DoubleSide,
-        emissive: 0xffffff,
-        emissiveIntensity: 2.0
-    });
-    const center = new THREE.Mesh(centerGeometry, centerMaterial);
+    const center = new THREE.Mesh(centerGeometry, sharedSpotMaterials.center);
     center.rotation.x = -Math.PI / 2;
     center.position.y = -0.13 * scale;
     spotGroup.add(center);
@@ -312,12 +329,7 @@ function createSpotMesh(position, color) {
     // 9. Vis de fixation (petits détails) - ~0.5 cm de diamètre
     for (let i = 0; i < 4; i++) {
         const screwGeometry = new THREE.CylinderGeometry(0.005 * scale, 0.005 * scale, 0.01 * scale, 8);
-        const screwMaterial = new THREE.MeshStandardMaterial({
-            color: 0x4a4a4a,
-            roughness: 0.4,
-            metalness: 0.7
-        });
-        const screw = new THREE.Mesh(screwGeometry, screwMaterial);
+        const screw = new THREE.Mesh(screwGeometry, sharedSpotMaterials.screw);
         const angle = (i / 4) * Math.PI * 2;
         screw.position.x = Math.cos(angle) * 0.055 * scale;
         screw.position.z = Math.sin(angle) * 0.055 * scale;
@@ -439,8 +451,8 @@ function createGalleryFloor() {
         color: 0xd4c4b0,
         roughness: 0.75,
         metalness: 0.0,
-        envMapIntensity: 0.3,
         flatShading: false
+        // Pas d'envMap pour économiser les uniformes
     });
     
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -612,22 +624,18 @@ function createWallRoughnessMap() {
 function createGalleryWalls() {
     const wallGroup = new THREE.Group();
     
-    // Créer les textures pour les murs
+    // Créer la texture pour les murs (simplifié pour réduire les uniformes)
     const wallTexture = createWallTexture();
-    const wallNormalMap = createWallNormalMap();
-    const wallRoughnessMap = createWallRoughnessMap();
+    // Pas de normalMap ni roughnessMap pour économiser les uniformes WebGL
     
-    // Matériau avec textures pour un rendu naturel
+    // Matériau simplifié pour réduire les uniformes WebGL (seulement map, pas de normalMap)
     const wallMaterial = new THREE.MeshStandardMaterial({
         map: wallTexture,
-        normalMap: wallNormalMap,
-        normalScale: new THREE.Vector2(0.8, 0.8), // Relief plus visible pour mieux voir les textures
-        roughnessMap: wallRoughnessMap,
         color: 0xffffff, // Blanc pur pour les murs de galerie
         roughness: 0.75,
         metalness: 0.0,
-        envMapIntensity: 0.2, // Augmenté pour plus de reflets et visibilité
         flatShading: false
+        // Pas de normalMap, roughnessMap ni envMap pour économiser les uniformes
     });
     
     const wallHeight = 8;
@@ -686,19 +694,13 @@ function createGalleryCeiling() {
     const roomDepth = 50;
     const ceilingHeight = 3; // Hauteur du plafond à 3m
     
-    // Créer une texture de plafond (blanc cassé avec légère texture)
-    const ceilingTexture = createWallTexture(); // Réutiliser la texture des murs
-    const ceilingNormalMap = createWallNormalMap(); // Réutiliser la normal map
-    
+    // Matériau simplifié sans textures pour réduire les uniformes WebGL
     const ceilingMaterial = new THREE.MeshStandardMaterial({
-        map: ceilingTexture,
-        normalMap: ceilingNormalMap,
-        normalScale: new THREE.Vector2(0.4, 0.4), // Relief plus subtil pour le plafond
-        color: 0xfafafa, // Blanc cassé légèrement plus clair que les murs
-        roughness: 0.8,
+        color: 0xffffff, // Blanc pur
+        roughness: 0.9,
         metalness: 0.0,
-        envMapIntensity: 0.1,
         flatShading: false
+        // Pas de textures pour économiser les uniformes
     });
     
     const ceiling = new THREE.Mesh(
@@ -706,7 +708,7 @@ function createGalleryCeiling() {
         ceilingMaterial
     );
     ceiling.rotation.x = Math.PI / 2; // Rotation pour être horizontal
-    ceiling.position.y = ceilingHeight - 2; // Position à 3m de hauteur (sol à y=-2)
+    ceiling.position.y = ceilingHeight; // Position à 3m de hauteur (sol à y=-2)
     ceiling.receiveShadow = true;
     ceiling.castShadow = false; // Le plafond ne projette pas d'ombres
     
@@ -932,7 +934,6 @@ const frameStyles = {
         color: 0xd4af37, // Or classique
         roughness: 0.3,
         metalness: 0.8,
-        envMapIntensity: 0.5,
         depth: 0.12,
         name: 'Classique doré'
     },
@@ -940,7 +941,6 @@ const frameStyles = {
         color: 0x3d2817, // Bois foncé
         roughness: 0.8,
         metalness: 0.0,
-        envMapIntensity: 0.2,
         depth: 0.1,
         name: 'Bois foncé'
     },
@@ -948,7 +948,6 @@ const frameStyles = {
         color: 0xd4a574, // Bois clair
         roughness: 0.7,
         metalness: 0.0,
-        envMapIntensity: 0.2,
         depth: 0.1,
         name: 'Bois clair'
     },
@@ -956,7 +955,6 @@ const frameStyles = {
         color: 0xffd700, // Or brillant
         roughness: 0.2,
         metalness: 0.9,
-        envMapIntensity: 0.6,
         depth: 0.15,
         name: 'Orné doré'
     },
@@ -964,7 +962,6 @@ const frameStyles = {
         color: 0x1a1a1a, // Noir moderne
         roughness: 0.4,
         metalness: 0.1,
-        envMapIntensity: 0.3,
         depth: 0.08,
         name: 'Moderne noir'
     },
@@ -972,7 +969,6 @@ const frameStyles = {
         color: 0x8b4513, // Acajou
         roughness: 0.6,
         metalness: 0.0,
-        envMapIntensity: 0.25,
         depth: 0.12,
         name: 'Acajou'
     },
@@ -980,7 +976,6 @@ const frameStyles = {
         color: 0xc0c0c0, // Argent
         roughness: 0.3,
         metalness: 0.7,
-        envMapIntensity: 0.4,
         depth: 0.1,
         name: 'Argent'
     },
@@ -988,7 +983,6 @@ const frameStyles = {
         color: 0x5c4033, // Noyer
         roughness: 0.7,
         metalness: 0.0,
-        envMapIntensity: 0.2,
         depth: 0.11,
         name: 'Noyer'
     }
@@ -1014,8 +1008,8 @@ function createFrame(width, height, style = null) {
     const frameMaterial = new THREE.MeshStandardMaterial({
         color: style.color,
         roughness: style.roughness,
-        metalness: style.metalness,
-        envMapIntensity: style.envMapIntensity
+        metalness: style.metalness
+        // Pas d'envMapIntensity pour économiser les uniformes
     });
     
     // Créer les 4 côtés du cadre
@@ -1124,18 +1118,8 @@ function loadPainting(artwork, position) {
                 
                 const geometry = new THREE.PlaneGeometry(width, height);
                 
-                // Utiliser les textures partagées pour éviter de dépasser la limite de 16 unités de texture
-                if (!sharedCanvasNormalMap) {
-                    sharedCanvasNormalMap = createCanvasNormalMap();
-                }
-                if (!sharedCanvasRoughnessMap) {
-                    sharedCanvasRoughnessMap = createCanvasRoughnessMap();
-                }
-                if (!sharedEnvironmentMap) {
-                    sharedEnvironmentMap = createEnvironmentMap();
-                }
-                
-                // Utiliser MeshStandardMaterial avec le minimum de textures pour éviter de dépasser la limite WebGL
+                // Matériau simplifié au maximum pour éviter de dépasser la limite WebGL
+                // Pas de textures partagées inutilisées pour économiser les uniformes
                 // On utilise seulement map (1 texture par matériau) pour éviter les problèmes de limite
                 // L'envMap est désactivée pour réduire le nombre d'unités de texture utilisées
                 // On simule l'effet de reflet avec une rugosité réduite
@@ -1147,14 +1131,18 @@ function loadPainting(artwork, position) {
                     // Pas d'envMap pour économiser une unité de texture
                 });
                 
-                const backMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xd4c4b0,
-                    roughness: 0.8,
-                    metalness: 0.0,
-                    side: THREE.FrontSide,
-                    transparent: false,
-                    opacity: 1.0
-                });
+                // Matériau partagé pour le dos de tous les tableaux (identique pour tous)
+                if (!sharedBackMaterial) {
+                    sharedBackMaterial = new THREE.MeshStandardMaterial({
+                        color: 0xd4c4b0,
+                        roughness: 0.8,
+                        metalness: 0.0,
+                        side: THREE.FrontSide,
+                        transparent: false,
+                        opacity: 1.0
+                    });
+                }
+                const backMaterial = sharedBackMaterial;
                 
                 const paintingGroup = new THREE.Group();
                 
@@ -1256,8 +1244,13 @@ function positionPaintings() {
     const wallSpacing = 0.05; // Légèrement devant le mur
     const wallMargin = 3; // Marge depuis les coins des murs
     
+    // Limiter le nombre de tableaux pour éviter de dépasser la limite WebGL (MAX_FRAGMENT_UNIFORM_VECTORS)
+    // Chaque tableau consomme des uniformes, donc on limite à 20 tableaux maximum
+    const MAX_PAINTINGS = 20;
+    const limitedArtworks = artworksData.slice(0, MAX_PAINTINGS);
+    
     // Répartir les tableaux sur les 4 murs de manière équilibrée
-    const totalPaintings = artworksData.length;
+    const totalPaintings = limitedArtworks.length;
     const paintingsPerWall = Math.ceil(totalPaintings / 4);
     
     // Initialiser le tableau paintings avec la bonne taille
@@ -1277,7 +1270,7 @@ function positionPaintings() {
         return Math.max(calculatedSpacing, minSpacing);
     };
     
-    artworksData.forEach((artwork, index) => {
+    limitedArtworks.forEach((artwork, index) => {
         let position;
         const wallNumber = Math.floor(index / paintingsPerWall);
         const wallIndex = index % paintingsPerWall;
