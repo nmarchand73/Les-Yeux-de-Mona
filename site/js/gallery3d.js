@@ -16,7 +16,7 @@ let spotLights = []; // Tableau pour stocker tous les spots
 let spotHelpers = []; // Tableau pour stocker les helpers des spots (pour animation)
 let spotMeshes = []; // Objets 3D visibles représentant les spots au plafond
 let ambientLight = null; // Lumière ambiante (pour pouvoir l'éteindre)
-let spotOnlyMode = false; // Mode "spots uniquement"
+let spotOnlyMode = true; // Mode "spots uniquement" activé par défaut
 let showHelpers = false; // Afficher les helpers (masqués par défaut)
 let currentLightConfigName = 'gallery-spots'; // Configuration d'éclairage active
 let directionalLight = null; // Lumière directionnelle (pour config jour)
@@ -515,45 +515,48 @@ function setupLights(configName = 'gallery-spots') {
     if (config.spots && config.spots.enabled) {
         const spotsConfig = config.spots;
         
-        // Positionnement optimal selon les meilleures pratiques muséales :
-        // - Angle d'incidence de 30° par rapport à la verticale
-        // - 2 spots symétriques de chaque côté pour réduire les ombres
-        // - Distance adaptée pour un éclairage uniforme
-        const optimalAngle = 30 * Math.PI / 180; // 30° en radians
-        const optimalBeamAngle = 12 * Math.PI / 180; // Angle de faisceau optimal
+        // Positionnement optimisé pour maximiser les reflets du vernis :
+        // - Angle d'incidence plus prononcé (45° au lieu de 30°) pour créer des reflets visibles
+        // - Spots plus latéraux et plus bas pour créer des angles de réflexion variés
+        // - Cibles légèrement décalées pour créer des reflets dynamiques
+        const optimalAngle = 45 * Math.PI / 180; // 45° en radians (plus latéral pour reflets)
+        const optimalBeamAngle = 15 * Math.PI / 180; // Angle de faisceau légèrement plus large
         
-        // Distance horizontale depuis le centre du tableau pour obtenir l'angle de 30°
+        // Distance horizontale depuis le centre du tableau pour obtenir l'angle de 45°
         const distanceFromCenter = (ceilingHeight - paintingCenterY) * Math.tan(optimalAngle);
         
-        // Espacement horizontal optimal : les spots doivent être positionnés de manière symétrique
+        // Espacement horizontal plus large pour créer des reflets latéraux visibles
         const spotHorizontalOffset = Math.max(
-            paintingActualWidth * 0.4,
-            distanceFromCenter * 0.8
+            paintingActualWidth * 0.6, // Plus large pour reflets latéraux
+            distanceFromCenter * 1.2 // Plus éloigné du centre
         );
         
-        // Distance du mur pour le spot
-        const spotDistanceFromWall = Math.max(0.5, distanceFromCenter * 0.6);
+        // Distance du mur pour le spot (plus proche pour reflets plus prononcés)
+        const spotDistanceFromWall = Math.max(0.8, distanceFromCenter * 0.8);
         
-        // Calculer la position Y du spot pour maintenir une distance constante du haut du tableau
-        let spotY = paintingTopY + constantDistanceFromTop;
+        // Position Y du spot : plus bas pour créer des reflets depuis différents angles
+        // Positionner à mi-hauteur entre le haut du tableau et le plafond
+        let spotY = paintingCenterY + (ceilingHeight - paintingCenterY) * 0.6;
         // S'assurer que le spot ne dépasse pas le plafond
-        spotY = Math.min(spotY, ceilingHeight - 0.1);
+        spotY = Math.min(spotY, ceilingHeight - 0.15);
         
-        // Créer 2 spots (un de chaque côté du tableau)
+        // Créer 2 spots (un de chaque côté du tableau) pour reflets symétriques
         for (let spotIndex = 0; spotIndex < 2; spotIndex++) {
-            // Position X : symétrique par rapport au centre du tableau
+            // Position X : symétrique par rapport au centre, plus éloigné pour reflets latéraux
             const spotX = spotIndex === 0 ? -spotHorizontalOffset : spotHorizontalOffset;
             
-            // Position Z : devant le tableau avec la distance optimale
+            // Position Z : devant le tableau avec la distance optimale pour reflets
             const spotZ = paintingZ + spotDistanceFromWall;
             
-            // Cible : centre du tableau
-            const targetX = 0;
-            const targetY = paintingCenterY;
+            // Cible : légèrement décalée du centre pour créer des reflets dynamiques
+            // Décalage vers le côté opposé du spot pour maximiser les reflets
+            const targetOffsetX = spotIndex === 0 ? 0.3 : -0.3; // Décalage vers le centre opposé
+            const targetX = targetOffsetX;
+            const targetY = paintingCenterY + 0.2; // Légèrement au-dessus du centre pour reflets
             const targetZ = paintingZ;
             
-            // Intensité de base multipliée par 2.5 pour plus de puissance
-            const baseIntensity = (spotsConfig.defaultIntensity || 1.0) * 2.5;
+            // Intensité de base multipliée par 4.0 pour une puissance accrue des spots
+            const baseIntensity = (spotsConfig.defaultIntensity || 1.0) * 4.0;
             
             const spot = new THREE.SpotLight(
                 spotsConfig.colorTemperature,
@@ -1215,6 +1218,8 @@ function createParquetTexture() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(4, 4); // Répéter la texture 4x4 fois
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
@@ -1312,6 +1317,8 @@ function createWallTexture() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(3, 3); // Répéter la texture sur les murs
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
@@ -1357,6 +1364,8 @@ function createWallNormalMap() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(3, 3);
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
@@ -1394,6 +1403,8 @@ function createWallRoughnessMap() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, 2);
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
@@ -1613,57 +1624,82 @@ function createEnvironmentMap() {
     // Convertir en texture avec mapping équirectangulaire
     const texture = new THREE.CanvasTexture(canvas);
     texture.mapping = THREE.EquirectangularReflectionMapping;
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
 }
 
 // Fonction pour créer une normal map de grain de toile
-// Simule la texture de la toile sous la peinture et le vernis
+// Simule la texture dense et serrée de la toile sous la peinture et le vernis
+// Les toiles de qualité ont un tissage très dense avec un relief visible
 function createCanvasNormalMap() {
-    const size = 512;
+    const size = 1024; // Résolution augmentée pour un tissage plus fin et dense
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
     const context = canvas.getContext('2d');
     
-    // Créer un motif de grain de toile (tissage)
-    // Les toiles ont un motif de tissage avec des fils qui se croisent
-    const threadSize = 3; // Taille des fils de la toile (augmentée pour plus de visibilité)
-    const threadSpacing = 5; // Espacement entre les fils (augmenté pour plus de visibilité)
+    // Créer un motif de tissage très dense (comme une toile de qualité)
+    // Les toiles de peinture ont un tissage serré avec des fils fins
+    const threadSize = 1.5; // Fils fins pour un tissage dense
+    const threadSpacing = 2.5; // Espacement très serré pour un tissage dense (toile fine)
     
     // Remplir avec une couleur neutre (128, 128, 255 pour normal map)
     // Le bleu à 255 indique une surface plane normale
     context.fillStyle = 'rgb(128, 128, 255)';
     context.fillRect(0, 0, size, size);
     
-    // Dessiner le motif de tissage (chaîne et trame)
-    // Fils horizontaux (trame)
+    // Dessiner le motif de tissage dense (chaîne et trame)
+    // Fils horizontaux (trame) - tissage très serré
     for (let y = 0; y < size; y += threadSpacing) {
-        context.fillStyle = 'rgb(100, 100, 255)'; // Légèrement plus sombre = légèrement en relief
+        // Créer un relief plus prononcé pour les fils
+        // Les fils créent des crêtes et des vallées dans le tissage
+        const threadDepth = 20; // Profondeur du relief (plus élevée pour plus de visibilité)
+        context.fillStyle = `rgb(${128 - threadDepth}, ${128 - threadDepth}, ${255 - threadDepth})`; // Plus sombre = plus en relief
+        context.fillRect(0, y, size, threadSize);
+        
+        // Ajouter un léger dégradé pour simuler la forme arrondie des fils
+        const gradient = context.createLinearGradient(0, y, 0, y + threadSize);
+        gradient.addColorStop(0, `rgba(${128 - threadDepth * 0.5}, ${128 - threadDepth * 0.5}, ${255 - threadDepth * 0.5}, 0.8)`);
+        gradient.addColorStop(0.5, `rgba(${128 - threadDepth}, ${128 - threadDepth}, ${255 - threadDepth}, 1)`);
+        gradient.addColorStop(1, `rgba(${128 - threadDepth * 0.5}, ${128 - threadDepth * 0.5}, ${255 - threadDepth * 0.5}, 0.8)`);
+        context.fillStyle = gradient;
         context.fillRect(0, y, size, threadSize);
     }
     
-    // Fils verticaux (chaîne)
+    // Fils verticaux (chaîne) - tissage très serré
     for (let x = 0; x < size; x += threadSpacing) {
-        context.fillStyle = 'rgb(100, 100, 255)';
+        const threadDepth = 20; // Profondeur du relief
+        context.fillStyle = `rgb(${128 - threadDepth}, ${128 - threadDepth}, ${255 - threadDepth})`;
+        context.fillRect(x, 0, threadSize, size);
+        
+        // Ajouter un léger dégradé pour simuler la forme arrondie des fils
+        const gradient = context.createLinearGradient(x, 0, x + threadSize, 0);
+        gradient.addColorStop(0, `rgba(${128 - threadDepth * 0.5}, ${128 - threadDepth * 0.5}, ${255 - threadDepth * 0.5}, 0.8)`);
+        gradient.addColorStop(0.5, `rgba(${128 - threadDepth}, ${128 - threadDepth}, ${255 - threadDepth}, 1)`);
+        gradient.addColorStop(1, `rgba(${128 - threadDepth * 0.5}, ${128 - threadDepth * 0.5}, ${255 - threadDepth * 0.5}, 0.8)`);
+        context.fillStyle = gradient;
         context.fillRect(x, 0, threadSize, size);
     }
     
-    // Ajouter des variations subtiles pour simuler l'irrégularité de la toile
+    // Ajouter des variations subtiles pour simuler l'irrégularité naturelle de la toile
     const imageData = context.getImageData(0, 0, size, size);
     const data = imageData.data;
     
     for (let i = 0; i < data.length; i += 4) {
-        // Générer un bruit plus prononcé pour simuler les imperfections de la toile
-        const noise = (Math.random() - 0.5) * 15; // Variation plus importante pour plus de visibilité
+        // Générer un bruit subtil pour simuler les micro-variations de la toile
+        const noise = (Math.random() - 0.5) * 8; // Bruit subtil pour le réalisme
         
         // Ajuster les valeurs RGB pour créer une normal map
         // R et G représentent les directions X et Y de la normale
-        // B représente la profondeur (Z)
+        // B représente la profondeur (Z) - valeurs plus basses = plus de relief
         data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R (X)
         data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G (Y)
-        data[i + 2] = Math.max(180, Math.min(255, data[i + 2] + noise * 0.8)); // B (Z) - plus de variation pour relief plus visible
+        // B (Z) : valeurs plus basses créent plus de relief visible
+        // Pour un tissage dense avec relief prononcé, on garde des valeurs plus basses
+        data[i + 2] = Math.max(160, Math.min(255, data[i + 2] + noise * 0.5)); // B (Z) - relief plus prononcé
     }
     
     context.putImageData(imageData, 0, 0);
@@ -1672,7 +1708,9 @@ function createCanvasNormalMap() {
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(2, 2); // Répéter la texture pour couvrir tout le tableau
+    texture.repeat.set(3, 3); // Répéter la texture pour un tissage dense sur tout le tableau
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
@@ -1715,6 +1753,8 @@ function createCanvasRoughnessMap() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(2, 2);
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
@@ -1729,6 +1769,10 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
             (texture) => {
                 // Configurer la texture pour préserver les couleurs originales
                 texture.colorSpace = THREE.SRGBColorSpace; // Assurer le bon espace colorimétrique
+                // Désactiver les mipmaps pour éviter l'avertissement WebGL de lazy initialization
+                texture.generateMipmaps = false;
+                texture.minFilter = THREE.LinearFilter;
+                texture.magFilter = THREE.LinearFilter;
                 // flipY reste à true par défaut (Three.js gère automatiquement l'inversion nécessaire)
                 
                 // Calculer les dimensions
@@ -1756,16 +1800,12 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                 // Créer le plan avec la texture
                 const geometry = new THREE.PlaneGeometry(width, height);
                 
-                // Matériau simplifié pour réduire les uniformes WebGL
-                // Utilisation de MeshStandardMaterial avec seulement la texture principale
-                // pour éviter de dépasser la limite MAX_FRAGMENT_UNIFORM_VECTORS
-                const frontMaterial = new THREE.MeshStandardMaterial({
-                    map: texture, // Texture de l'image du tableau
-                    side: THREE.FrontSide,
-                    roughness: 0.25, // Rugosité réduite pour simuler le vernis/reflet
-                    metalness: 0.0
-                    // Pas de normalMap, roughnessMap, clearcoat, ni envMap pour économiser les uniformes
-                });
+                // Créer la normal map de la toile (partagée entre toutes les couches)
+                // Cette normal map représente le tissage dense de la toile
+                const canvasNormalMap = createCanvasNormalMap();
+                
+                // Créer l'environment map pour les reflets du vernis
+                const envMap = createEnvironmentMap();
                 
                 // Créer le matériau pour le dos du tableau (opaque, couleur toile/bois)
                 const backMaterial = new THREE.MeshStandardMaterial({
@@ -1777,15 +1817,79 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                     opacity: 1.0 // Opacité maximale
                 });
                 
-                // Créer un groupe pour contenir les deux faces du tableau
+                // COUCHE 1 : La toile (base avec texture de tissage dense)
+                // Cette couche représente la toile brute sous tout le reste
                 const paintingGroup = new THREE.Group();
                 
-                // Face avant (avec l'image) - rendue en premier
-                const frontPainting = new THREE.Mesh(geometry, frontMaterial);
-                frontPainting.castShadow = true;
-                frontPainting.receiveShadow = true;
-                frontPainting.renderOrder = 1; // Rendu en premier
-                paintingGroup.add(frontPainting);
+                const canvasMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xf5f0e8, // Couleur beige/lin de la toile brute
+                    roughness: 0.9, // Surface très matte
+                    metalness: 0.0,
+                    normalMap: canvasNormalMap,
+                    normalScale: new THREE.Vector2(1.2, 1.2) // Relief prononcé du tissage
+                });
+                const canvasLayer = new THREE.Mesh(geometry, canvasMaterial);
+                canvasLayer.position.z = -0.003; // Légèrement en arrière
+                canvasLayer.renderOrder = 0; // Rendu en premier (fond)
+                canvasLayer.castShadow = true;
+                canvasLayer.receiveShadow = true;
+                paintingGroup.add(canvasLayer);
+                
+                // COUCHE 2 : L'apprêt (gesso) - couche blanche qui scelle la toile
+                const gessoMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xfaf8f3, // Blanc cassé du gesso
+                    roughness: 0.7,
+                    metalness: 0.0,
+                    transparent: true,
+                    opacity: 0.2, // Très transparent pour ne pas blanchir l'image, juste un léger effet
+                    normalMap: canvasNormalMap,
+                    normalScale: new THREE.Vector2(0.5, 0.5) // Relief légèrement visible sous le gesso
+                });
+                const gessoLayer = new THREE.Mesh(geometry, gessoMaterial);
+                gessoLayer.position.z = -0.002; // Entre la toile et la peinture
+                gessoLayer.renderOrder = 1;
+                gessoLayer.castShadow = true;
+                gessoLayer.receiveShadow = true;
+                paintingGroup.add(gessoLayer);
+                
+                // COUCHE 3 : La peinture avec vernis intégré (clearcoat au lieu d'une couche séparée)
+                // Cette méthode évite le blanchissement causé par les couches transparentes superposées
+                const paintMaterial = new THREE.MeshPhysicalMaterial({
+                    map: texture, // Texture de l'image du tableau
+                    side: THREE.FrontSide,
+                    roughness: 0.5, // Rugosité de la peinture sous le vernis (légèrement plus matte)
+                    metalness: 0.0,
+                    normalMap: canvasNormalMap,
+                    normalScale: new THREE.Vector2(0.5, 0.5), // Relief plus visible pour montrer la texture de la toile
+                    // Propriétés du vernis (clearcoat) - intégré dans le matériau pour un rendu réaliste
+                    clearcoat: 1.0, // Couche de vernis complète et épaisse
+                    clearcoatRoughness: 0.01, // Vernis encore plus lisse et brillant (presque miroir)
+                    // Propriétés de réflexion - le vernis réfléchit l'environnement
+                    reflectivity: 0.3, // Réflexion plus prononcée pour un vernis réaliste
+                    ior: 1.5, // Indice de réfraction du vernis (identique au verre)
+                    envMapIntensity: 0.8, // Intensité accrue des reflets pour bien voir l'environnement dans le vernis
+                    transmission: 0.0, // Pas de transmission
+                    thickness: 0.0 // Pas d'épaisseur
+                });
+                
+                // Ajouter l'environment map pour les reflets du vernis
+                if (envMap) {
+                    paintMaterial.envMap = envMap;
+                }
+                
+                // Ajouter la normal map au clearcoat pour que le vernis suive la texture dense de la toile
+                // Cela crée des variations subtiles dans les reflets, comme sur une vraie toile vernie
+                if (canvasNormalMap) {
+                    paintMaterial.clearcoatNormalMap = canvasNormalMap;
+                    paintMaterial.clearcoatNormalScale = new THREE.Vector2(0.7, 0.7); // Le vernis suit bien le relief de la toile
+                }
+                
+                const paintLayer = new THREE.Mesh(geometry, paintMaterial);
+                paintLayer.position.z = 0; // Au premier plan
+                paintLayer.renderOrder = 2;
+                paintLayer.castShadow = true;
+                paintLayer.receiveShadow = true;
+                paintingGroup.add(paintLayer);
                 
                 // Face arrière (opaque) - légèrement décalée et rendue en second
                 const backPainting = new THREE.Mesh(geometry, backMaterial);
@@ -1793,7 +1897,7 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                 backPainting.position.z = -0.02; // Légèrement en arrière pour éviter le z-fighting
                 backPainting.castShadow = true;
                 backPainting.receiveShadow = true;
-                backPainting.renderOrder = 0; // Rendu en second
+                backPainting.renderOrder = -1; // Rendu en premier (fond)
                 paintingGroup.add(backPainting);
                 
                 painting = paintingGroup;
@@ -1950,6 +2054,11 @@ function init() {
         loadPainting(params.image, realHeight, realWidth).then(() => {
             // Éclairage configuré APRÈS le chargement du tableau pour pouvoir utiliser les dimensions réelles
             setupLights(currentLightConfigName);
+            
+            // Activer le mode "spots uniquement" par défaut après la configuration de l'éclairage
+            if (spotOnlyMode) {
+                toggleSpotOnlyMode(true);
+            }
             
             // Masquer le loading
             const loadingElement = document.getElementById('loading');
@@ -2418,6 +2527,11 @@ function changeLightConfiguration(configName) {
                     label.textContent = 'Mode fenêtre uniquement';
                 }
             }
+            // Si le mode spotOnlyMode est activé par défaut, le maintenir activé
+            if (spotOnlyMode) {
+                spotOnlyToggle.checked = true;
+                toggleSpotOnlyMode(true);
+            }
         } else {
             spotOnlyToggle.checked = false;
             spotOnlyToggle.disabled = true;
@@ -2470,7 +2584,9 @@ function toggleSpotOnlyMode(enabled) {
         }
         
         // Réduire l'exposition pour plus de contraste en mode spot uniquement
-        renderer.toneMappingExposure = 0.8;
+        if (renderer) {
+            renderer.toneMappingExposure = 0.8;
+        }
     } else {
         // Mode normal : rallumer la lumière ambiante et la lumière de remplissage
         if (ambientLight && config.ambientLight && config.ambientLight.enabled) {
@@ -2501,7 +2617,9 @@ function toggleSpotOnlyMode(enabled) {
         }
         
         // Restaurer l'exposition normale
-        renderer.toneMappingExposure = 1.2;
+        if (renderer) {
+            renderer.toneMappingExposure = 1.2;
+        }
     }
 }
 
@@ -2582,6 +2700,9 @@ function setupEventListeners() {
     // Toggle "spots uniquement"
     const spotOnlyToggle = document.getElementById('spot-only-toggle');
     if (spotOnlyToggle) {
+        // Cocher la checkbox par défaut (le mode sera activé après l'initialisation dans init())
+        spotOnlyToggle.checked = true;
+        
         spotOnlyToggle.addEventListener('change', (e) => {
             toggleSpotOnlyMode(e.target.checked);
         });
