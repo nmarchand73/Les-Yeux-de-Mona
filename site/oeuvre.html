@@ -891,12 +891,7 @@
                 const newImageData = new ImageData(thirdPassData, width, height);
                 canvasContext.putImageData(newImageData, 0, 0);
                 
-                // Log success for debugging
-                console.log('Sharpening applied successfully:', {
-                    width: finalWidth,
-                    height: finalHeight,
-                    zoomLevel: Math.max(finalWidth / img.naturalWidth, finalHeight / img.naturalHeight).toFixed(2)
-                });
+                // Sharpening applied successfully
             } catch (e) {
                 // If processing fails (e.g., CORS), just use the upscaled image without sharpening
                 console.warn('Image processing limited by CORS or memory constraints:', e);

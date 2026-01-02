@@ -3,24 +3,29 @@
 let currentView = 'gallery';
 let filteredArtworks = [];
 
+/**
+ * Initialize the application when data is ready
+ */
+function initializeApp() {
+    initializeFilters();
+    renderGallery();
+    setupEventListeners();
+}
+
 // Initialize - wait for data to load
 document.addEventListener('DOMContentLoaded', () => {
     // Wait for artworks data to be loaded
-    window.addEventListener('artworksDataLoaded', () => {
-        initializeFilters();
-        renderGallery();
-        setupEventListeners();
-    });
+    window.addEventListener('artworksDataLoaded', initializeApp);
     
     // If data is already loaded (race condition)
     if (allArtworks.length > 0) {
-        initializeFilters();
-        renderGallery();
-        setupEventListeners();
+        initializeApp();
     }
 });
 
-// Setup event listeners
+/**
+ * Set up all event listeners for user interactions
+ */
 function setupEventListeners() {
     // View toggle
     document.querySelectorAll('.btn-view').forEach(btn => {
@@ -31,58 +36,58 @@ function setupEventListeners() {
     });
     
     // Search
-    document.getElementById('search').addEventListener('input', (e) => {
+    document.getElementById('search').addEventListener('input', () => {
         filterArtworks();
     });
     
     // Museum filter
-    document.getElementById('filter-museum').addEventListener('change', (e) => {
+    document.getElementById('filter-museum').addEventListener('change', () => {
         filterArtworks();
     });
     
     // Artist filter
-    document.getElementById('filter-artist').addEventListener('change', (e) => {
+    document.getElementById('filter-artist').addEventListener('change', () => {
         filterArtworks();
     });
     
     // Technique filter
-    document.getElementById('filter-technique').addEventListener('change', (e) => {
+    document.getElementById('filter-technique').addEventListener('change', () => {
         filterArtworks();
     });
 }
 
-// Initialize filter dropdowns
+/**
+ * Populate filter dropdowns with available museums, artists, and techniques
+ */
 function initializeFilters() {
     const museumSelect = document.getElementById('filter-museum');
     const artistSelect = document.getElementById('filter-artist');
     const techniqueSelect = document.getElementById('filter-technique');
     
-    // Populate museums
-    filterData.museums.forEach(museum => {
-        const option = document.createElement('option');
-        option.value = museum;
-        option.textContent = museum;
-        museumSelect.appendChild(option);
-    });
+    /**
+     * Helper function to populate a select dropdown with options
+     * @param {HTMLSelectElement} selectElement - The select element to populate
+     * @param {string[]} values - Array of values to add as options
+     */
+    const populateSelect = (selectElement, values) => {
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            selectElement.appendChild(option);
+        });
+    };
     
-    // Populate artists
-    filterData.artists.forEach(artist => {
-        const option = document.createElement('option');
-        option.value = artist;
-        option.textContent = artist;
-        artistSelect.appendChild(option);
-    });
-    
-    // Populate techniques
-    filterData.techniques.forEach(technique => {
-        const option = document.createElement('option');
-        option.value = technique;
-        option.textContent = technique;
-        techniqueSelect.appendChild(option);
-    });
+    // Populate filter dropdowns
+    populateSelect(museumSelect, filterData.museums);
+    populateSelect(artistSelect, filterData.artists);
+    populateSelect(techniqueSelect, filterData.techniques);
 }
 
-// Switch view
+/**
+ * Switch between gallery, timeline, and 3D views
+ * @param {string} view - The view to switch to ('gallery', 'timeline', or '3d')
+ */
 function switchView(view) {
     currentView = view;
     
@@ -109,7 +114,27 @@ function switchView(view) {
     }
 }
 
-// Filter artworks
+/**
+ * Ensure filtered artworks array is populated before rendering
+ */
+function ensureFilteredArtworks() {
+    if (filteredArtworks.length === 0) {
+        filterArtworks();
+    }
+}
+
+/**
+ * Render an empty state message when no artworks match the filters
+ * @param {HTMLElement} container - The container element to render the message in
+ */
+function renderEmptyState(container) {
+    container.innerHTML = '<div class="empty-state"><h2>Aucune œuvre trouvée</h2><p>Essayez de modifier vos filtres de recherche.</p></div>';
+}
+
+/**
+ * Filter artworks based on search term and selected filters
+ * Updates filteredArtworks array and re-renders the current view
+ */
 function filterArtworks() {
     const searchTerm = document.getElementById('search').value.toLowerCase();
     const museumFilter = document.getElementById('filter-museum').value;
@@ -135,20 +160,20 @@ function filterArtworks() {
     } else if (currentView === 'timeline') {
         renderTimeline();
     } else if (currentView === '3d') {
-        // La vue 3D est gérée par open3DGallery
+        // 3D view is handled by open3DGallery
     }
 }
 
-// Render gallery view
+/**
+ * Render the gallery grid view with filtered artworks
+ */
 function renderGallery() {
-    if (filteredArtworks.length === 0) {
-        filterArtworks(); // Initial filter
-    }
+    ensureFilteredArtworks();
     
     const grid = document.getElementById('artworks-grid');
     
     if (filteredArtworks.length === 0) {
-        grid.innerHTML = '<div class="empty-state"><h2>Aucune œuvre trouvée</h2><p>Essayez de modifier vos filtres de recherche.</p></div>';
+        renderEmptyState(grid);
         return;
     }
     
@@ -167,16 +192,16 @@ function renderGallery() {
     `).join('');
 }
 
-// Render timeline view
+/**
+ * Render the timeline view with artworks sorted by date
+ */
 function renderTimeline() {
-    if (filteredArtworks.length === 0) {
-        filterArtworks(); // Initial filter
-    }
+    ensureFilteredArtworks();
     
     const container = document.getElementById('timeline-container');
     
     if (filteredArtworks.length === 0) {
-        container.innerHTML = '<div class="empty-state"><h2>Aucune œuvre trouvée</h2><p>Essayez de modifier vos filtres de recherche.</p></div>';
+        renderEmptyState(container);
         return;
     }
     
@@ -204,7 +229,11 @@ function renderTimeline() {
     `;
 }
 
-// Extract year from date string
+/**
+ * Extract year from a date string (handles various date formats)
+ * @param {string} dateStr - Date string that may contain a year
+ * @returns {number} The extracted year, or 0 if no year found
+ */
 function extractYear(dateStr) {
     const match = dateStr.match(/\d{4}/);
     if (match) {
@@ -218,27 +247,27 @@ function extractYear(dateStr) {
     return 0;
 }
 
-// Open 3D Gallery with filtered artworks
+/**
+ * Open the 3D gallery view in a new tab with filtered artworks
+ */
 function open3DGallery() {
-    if (filteredArtworks.length === 0) {
-        filterArtworks(); // Initial filter
-    }
+    ensureFilteredArtworks();
     
     if (filteredArtworks.length === 0) {
         const container = document.getElementById('3d-container');
         if (container) {
-            container.innerHTML = '<div class="empty-state"><h2>Aucune œuvre trouvée</h2><p>Essayez de modifier vos filtres de recherche.</p></div>';
+            renderEmptyState(container);
         }
         return;
     }
     
-    // Passer uniquement les IDs des œuvres (beaucoup plus court)
+    // Pass only artwork IDs (much shorter)
     const artworkIds = filteredArtworks.map(artwork => artwork.id);
     
-    // Encoder les IDs en base64 pour réduire la taille
+    // Encode IDs in base64 to reduce size
     const encodedIds = encodeURIComponent(JSON.stringify(artworkIds));
     
-    // Ouvrir la galerie 3D dans un nouvel onglet
+    // Open 3D gallery in a new tab
     window.open(`gallery3d-multi.html?ids=${encodedIds}`, '_blank');
 }
 

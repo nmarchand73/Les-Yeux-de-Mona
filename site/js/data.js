@@ -4,12 +4,17 @@
 let artworksData = {};
 let allArtworks = [];
 let filterData = {
-    museums: ["Louvre", "Orsay", "Beaubourg"],
+    museums: ["Louvre", "Orsay", "Beaubourg", "Hudson River School"],
     artists: [],
     techniques: []
 };
 
-// Load data from merged JSON file
+/**
+ * Loads artworks data from JSON file and processes it into filterable arrays
+ * Populates allArtworks, filterData.artists, and filterData.techniques
+ * @async
+ * @returns {Promise<void>}
+ */
 async function loadArtworksData() {
     try {
         // Load merged artworks data
@@ -29,9 +34,7 @@ async function loadArtworksData() {
                 
                 // Extract all techniques
                 if (artwork.techniques && Array.isArray(artwork.techniques)) {
-                    artwork.techniques.forEach(technique => {
-                        techniquesSet.add(technique);
-                    });
+                    artwork.techniques.forEach(technique => techniquesSet.add(technique));
                 }
             }
         }
