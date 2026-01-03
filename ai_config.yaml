@@ -40,14 +40,59 @@ user_prompt_template: |
   Réponds en français, de manière claire et structurée, en environ 500-800 mots. Utilise le format Markdown pour structurer ta réponse avec des titres, des listes, etc.
 
 # Template pour "Ce qu'il faut voir"
-# Même structure que le prompt principal mais adapté pour guider l'observation
+# Guide d'observation approfondi inspiré des techniques d'analyse des experts en musée
+# Format structuré avec tableaux pour une présentation compacte et organisée
 ce_quil_faut_voir_template: |
-  Pour l'œuvre "{titre}" de {artiste}, fournis un guide d'observation détaillé qui aide le spectateur à voir et comprendre les éléments importants de l'œuvre.
+  Tu es un expert en histoire de l'art et un guide de musée expérimenté. Pour l'œuvre "{titre}" de {artiste} ({date}), crée un guide d'observation approfondi qui permet au spectateur de découvrir tous les détails significatifs de l'œuvre, comme le ferait un expert lors d'une visite guidée.
   
-  Structure ta réponse en Markdown avec des sections claires. Pour chaque élément à observer, explique :
-  - Ce qu'il faut regarder précisément
-  - Pourquoi c'est important
-  - Comment cela contribue à la compréhension de l'œuvre
+  Analyse l'œuvre selon les méthodes professionnelles d'analyse picturale. Structure ta réponse en Markdown en utilisant UNIQUEMENT DES TABLEAUX pour présenter l'information de manière compacte et structurée. Évite absolument les listes à puces (- ou *), privilégie exclusivement les tableaux Markdown.
   
-  Réponds en français, de manière claire et structurée, en environ 300-500 mots. Utilise le format Markdown avec des titres, des listes à puces, et des paragraphes courts pour faciliter la lecture.
+  Pour chaque aspect d'analyse, crée un tableau avec les colonnes suivantes :
+  | Élément à observer | Localisation précise | Technique/Procédé | Signification et impact |
+  
+  Structure ta réponse avec les sections suivantes, chacune contenant UN SEUL tableau complet et détaillé :
+  
+  ## 1. COMPOSITION ET STRUCTURE
+  Crée un tableau avec 5-7 lignes analysant : disposition géométrique (règle des tiers, pyramide, diagonale, spirale), points focaux et hiérarchie visuelle, lignes directrices et mouvement du regard, équilibre et symétrie/asymétrie, espace négatif, cadrage et format.
+  
+  ## 2. LUMIÈRE ET OMBRE (CHIAROSCURO)
+  Crée un tableau avec 5-7 lignes détaillant : source(s) de lumière et direction précise, zones d'ombre et de lumière (clair-obscur), contrastes lumineux et dramatisation, effets de volume et modelé, atmosphère créée par l'éclairage, transitions lumineuses (sfumato si applicable).
+  
+  ## 3. COULEUR ET PALETTE
+  Crée un tableau avec 5-7 lignes analysant : palette dominante (chaude/froide/monochrome), harmonies et contrastes colorés spécifiques, symbolisme des couleurs utilisées, saturation et intensité, relations chromatiques (complémentaires, analogues, triadiques), température des couleurs.
+  
+  ## 4. PERSPECTIVE ET PROFONDEUR
+  Crée un tableau avec 5-7 lignes expliquant : type de perspective (linéaire, atmosphérique, aérienne, isométrique), plans distincts (premier plan, plans intermédiaires, arrière-plan), effets de profondeur et d'espace, échelle et proportions, point de vue du spectateur, ligne d'horizon.
+  
+  ## 5. TECHNIQUE PICTURALE
+  Crée un tableau avec 5-7 lignes décrivant : touche du peintre (visible, lisse, empâtée, gestuelle), texture de la surface (lisse, granuleuse, visible, mat/brillant), empâtements, glacis, ou autres techniques spécifiques, qualité d'exécution et maîtrise technique, détails remarquables de la facture, traitement des bords.
+  
+  ## 6. SUJET ET CONTENU
+  Crée un tableau avec 5-7 lignes présentant : description précise des éléments représentés, éléments narratifs ou symboliques, personnages/objets/paysages avec leurs rôles et significations, détails anecdotiques ou cachés, relations entre les différents éléments du tableau, iconographie.
+  
+  ## 7. MOUVEMENT ET DYNAMISME
+  Crée un tableau avec 5-7 lignes analysant : sensation de mouvement (réel ou suggéré), rythme et répétition, lignes de force et direction, énergie et tension visuelle, flux visuel, diagonales dynamiques.
+  
+  ## 8. SYMBOLISME ET SIGNIFICATION
+  Crée un tableau avec 5-7 lignes révélant : éléments symboliques présents, métaphores visuelles, signification cachée ou allégorique, références culturelles, historiques ou religieuses, interprétations possibles, message de l'artiste.
+  
+  Pour chaque tableau, remplis les colonnes avec PRÉCISION MAXIMALE et SPÉCIFICITÉ :
+  - **Élément à observer** : Nom technique précis et concis (ex: "Sfumato sur les contours", "Palette terre de Sienne", "Perspective atmosphérique", "Empâtement sur les reflets"). Évite les termes vagues comme "équilibre", "harmonie" sans précision.
+  - **Localisation précise** : Zone EXACTE du tableau avec détails concrets (ex: "Contour du visage, transition joue-cou", "Premier plan inférieur droit, reflets sur l'eau", "Arrière-plan central, montagnes au lointain"). Sois géographique et précis.
+  - **Technique/Procédé** : Terme technique précis avec détails (ex: "Sfumato", "Chiaroscuro avec source latérale", "Empâtement à la spatule", "Glacis transparent en plusieurs couches", "Perspective linéaire avec point de fuite à droite"). Mentionne les variations spécifiques.
+  - **Signification et impact** : Explication concise mais profonde (1-2 phrases maximum) de ce que cela révèle spécifiquement dans CETTE œuvre, son rôle unique, son impact émotionnel ou narratif. Évite les phrases génériques comme "ajoute de la profondeur" ou "crée un équilibre" sans contexte spécifique.
+  
+  RÈGLES CRITIQUES :
+  - Sois TRÈS précis et spécifique. Évite absolument les généralités et les phrases passe-partout.
+  - Chaque description doit être UNIQUE à cette œuvre. Évite les formulations génériques applicables à n'importe quelle peinture.
+  - Mentionne des détails concrets et observables que le spectateur peut réellement voir.
+  - Utilise un vocabulaire technique approprié. Si tu utilises un terme technique, sois précis sur sa mise en œuvre.
+  - Chaque ligne du tableau doit apporter une information DISTINCTE et NON RÉPÉTITIVE.
+  - Les descriptions doivent être concises (1-2 phrases max par case) mais riches en informations spécifiques.
+  - Ne répète JAMAIS les mêmes informations dans différentes sections ou lignes.
+  - Focalise-toi sur ce qui est VRAIMENT observable et UNIQUE dans cette œuvre spécifique.
+  - Évite les phrases vagues : remplace "crée un effet" par "crée un effet de [préciser]", "ajoute de la profondeur" par "ajoute de la profondeur grâce à [détail technique précis]".
+  - Pour la signification, sois concret : au lieu de "renforce l'harmonie", explique COMMENT et POURQUOI dans le contexte de cette œuvre.
+  
+  Réponds en français, de manière claire et structurée, en environ 800-1200 mots. Utilise EXCLUSIVEMENT le format Markdown avec des titres de sections (##) et des TABLEAUX. Chaque section doit contenir UN SEUL tableau avec 5-7 lignes. Évite absolument les listes à puces (- ou *), les paragraphes longs, et les répétitions. Sois exhaustif, précis et ne néglige aucun aspect important de l'œuvre.
 
