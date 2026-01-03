@@ -187,7 +187,7 @@ function createSpotMesh(position, color) {
         metalness: 0.1
     });
     const base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.position.y = 0.005 * scale; // Juste au-dessus du plafond
+    base.position.y = 0; // Exactement au niveau du plafond (le spotGroup est positionné à ceilingHeight)
     spotGroup.add(base);
     
     // 2. Corps principal du spot (cylindre qui sort du plafond) - ~10-12 cm de diamètre, ~9 cm de hauteur
@@ -198,7 +198,7 @@ function createSpotMesh(position, color) {
         metalness: 0.8
     });
     const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    body.position.y = -0.04 * scale; // Positionner dans le plafond
+    body.position.y = -0.045 * scale; // La moitié du corps dans le plafond, l'autre moitié qui sort
     spotGroup.add(body);
     
     // 3. Réflecteur/parabole (forme conique évasée) - ~7 cm de diamètre, ~6 cm de hauteur
@@ -239,7 +239,7 @@ function createSpotMesh(position, color) {
     lightDisk.position.y = -0.13 * scale; // Au centre du réflecteur
     spotGroup.add(lightDisk);
     
-    // 6. Halo lumineux intense autour de la source
+    // 6. Halo lumineux intense autour de la source - positionné au plafond pour l'effet visuel
     const haloGeometry = new THREE.RingGeometry(0.04 * scale, 0.06 * scale, 32);
     const haloMaterial = new THREE.MeshStandardMaterial({
         color: color,
@@ -251,10 +251,10 @@ function createSpotMesh(position, color) {
     });
     const halo = new THREE.Mesh(haloGeometry, haloMaterial);
     halo.rotation.x = -Math.PI / 2;
-    halo.position.y = -0.13 * scale;
+    halo.position.y = -0.005 * scale; // Légèrement en dessous du plafond pour l'effet visuel
     spotGroup.add(halo);
     
-    // 7. Halo externe plus large et plus subtil
+    // 7. Halo externe plus large et plus subtil - positionné au plafond
     const outerHaloGeometry = new THREE.RingGeometry(0.06 * scale, 0.09 * scale, 32);
     const outerHaloMaterial = new THREE.MeshStandardMaterial({
         color: color,
@@ -266,7 +266,7 @@ function createSpotMesh(position, color) {
     });
     const outerHalo = new THREE.Mesh(outerHaloGeometry, outerHaloMaterial);
     outerHalo.rotation.x = -Math.PI / 2;
-    outerHalo.position.y = -0.13 * scale;
+    outerHalo.position.y = -0.005 * scale; // Légèrement en dessous du plafond pour l'effet visuel
     spotGroup.add(outerHalo);
     
     // 8. Point lumineux central intense (pour effet de brillance) - ~1.5 cm de diamètre
@@ -279,7 +279,7 @@ function createSpotMesh(position, color) {
     });
     const center = new THREE.Mesh(centerGeometry, centerMaterial);
     center.rotation.x = -Math.PI / 2;
-    center.position.y = -0.13 * scale;
+    center.position.y = -0.005 * scale; // Légèrement en dessous du plafond pour l'effet visuel
     spotGroup.add(center);
     
     // 9. Vis de fixation (petits détails) - ~0.5 cm de diamètre
@@ -294,7 +294,7 @@ function createSpotMesh(position, color) {
         const angle = (i / 4) * Math.PI * 2;
         screw.position.x = Math.cos(angle) * 0.055 * scale;
         screw.position.z = Math.sin(angle) * 0.055 * scale;
-        screw.position.y = 0.01 * scale;
+        screw.position.y = 0; // Vis au niveau du plafond
         spotGroup.add(screw);
     }
     
@@ -515,45 +515,46 @@ function setupLights(configName = 'gallery-spots') {
     if (config.spots && config.spots.enabled) {
         const spotsConfig = config.spots;
         
-        // Positionnement optimisé pour maximiser les reflets du vernis :
-        // - Angle d'incidence plus prononcé (45° au lieu de 30°) pour créer des reflets visibles
-        // - Spots plus latéraux et plus bas pour créer des angles de réflexion variés
-        // - Cibles légèrement décalées pour créer des reflets dynamiques
-        const optimalAngle = 45 * Math.PI / 180; // 45° en radians (plus latéral pour reflets)
-        const optimalBeamAngle = 15 * Math.PI / 180; // Angle de faisceau légèrement plus large
+        // Positionnement selon les standards muséaux :
+        // - Les spots doivent être au PLAFOND (ceilingHeight) pour un éclairage optimal
+        // - Angle d'incidence de 30° par rapport à la verticale (standard muséal)
+        // - Distance du mur : 1/3 de la hauteur du mur (règle du tiers)
+        // - Cette configuration minimise les reflets gênants et les ombres portées
+        const optimalAngle = 30 * Math.PI / 180; // 30° en radians (standard muséal)
+        const optimalBeamAngle = 12 * Math.PI / 180; // Angle de faisceau standard
         
-        // Distance horizontale depuis le centre du tableau pour obtenir l'angle de 45°
+        // Distance horizontale depuis le centre du tableau pour obtenir l'angle de 30°
         const distanceFromCenter = (ceilingHeight - paintingCenterY) * Math.tan(optimalAngle);
         
-        // Espacement horizontal plus large pour créer des reflets latéraux visibles
+        // Espacement horizontal : symétrique de chaque côté du tableau
+        // Les spots doivent être positionnés pour éclairer uniformément le tableau
         const spotHorizontalOffset = Math.max(
-            paintingActualWidth * 0.6, // Plus large pour reflets latéraux
-            distanceFromCenter * 1.2 // Plus éloigné du centre
+            paintingActualWidth * 0.4, // 40% de la largeur pour un éclairage uniforme
+            distanceFromCenter * 0.9 // Basé sur l'angle de 30°
         );
         
-        // Distance du mur pour le spot (plus proche pour reflets plus prononcés)
-        const spotDistanceFromWall = Math.max(0.8, distanceFromCenter * 0.8);
+        // Distance du mur selon la règle du tiers : 1/3 de la hauteur du mur
+        // Pour un mur de 3m de haut, les spots doivent être à environ 1m du mur
+        const wallHeight = 8; // Hauteur du mur (voir createGalleryWalls)
+        const spotDistanceFromWall = wallHeight / 3; // Règle du tiers (~1m pour un mur de 3m)
         
-        // Position Y du spot : plus bas pour créer des reflets depuis différents angles
-        // Positionner à mi-hauteur entre le haut du tableau et le plafond
-        let spotY = paintingCenterY + (ceilingHeight - paintingCenterY) * 0.6;
-        // S'assurer que le spot ne dépasse pas le plafond
-        spotY = Math.min(spotY, ceilingHeight - 0.15);
+        // Position Y du spot : AU PLAFOND (standard muséal)
+        // Les spots sont fixés au plafond, pas suspendus en dessous
+        const spotY = ceilingHeight;
         
         // Créer 2 spots (un de chaque côté du tableau) pour reflets symétriques
         for (let spotIndex = 0; spotIndex < 2; spotIndex++) {
             // Position X : symétrique par rapport au centre, plus éloigné pour reflets latéraux
             const spotX = spotIndex === 0 ? -spotHorizontalOffset : spotHorizontalOffset;
             
-            // Position Z : devant le tableau avec la distance optimale pour reflets
+            // Position Z : devant le tableau avec la distance optimale selon la règle du tiers
             const spotZ = paintingZ + spotDistanceFromWall;
             
-            // Cible : légèrement décalée du centre pour créer des reflets dynamiques
-            // Décalage vers le côté opposé du spot pour maximiser les reflets
-            const targetOffsetX = spotIndex === 0 ? 0.3 : -0.3; // Décalage vers le centre opposé
-            const targetX = targetOffsetX;
-            const targetY = paintingCenterY + 0.2; // Légèrement au-dessus du centre pour reflets
-            const targetZ = paintingZ;
+            // Cible : centre du tableau pour un éclairage uniforme (standard muséal)
+            // Les spots au plafond éclairent directement le centre du tableau
+            const targetX = 0; // Centre du tableau
+            const targetY = paintingCenterY; // Centre vertical du tableau
+            const targetZ = paintingZ; // Position Z du tableau
             
             // Intensité de base multipliée par 4.0 pour une puissance accrue des spots
             const baseIntensity = (spotsConfig.defaultIntensity || 1.0) * 5.5; // Intensité augmentée pour des couleurs plus vives
@@ -590,9 +591,11 @@ function setupLights(configName = 'gallery-spots') {
             scene.add(spot.target);
             spotLights.push(spot);
             
-            // Créer le mesh visible du spot
+            // Créer le mesh visible du spot - positionné au plafond (y = ceilingHeight)
+            // Le spotMesh représente le spot physique fixé au plafond (standard muséal)
+            const spotMeshPosition = new THREE.Vector3(spotX, ceilingHeight, spotZ);
             const spotMesh = createSpotMesh(
-                new THREE.Vector3(spotX, spotY, spotZ),
+                spotMeshPosition,
                 spotsConfig.colorTemperature
             );
             scene.add(spotMesh);
@@ -928,7 +931,8 @@ const frameStyles = {
         roughness: 0.3,
         metalness: 0.8,
         envMapIntensity: 0.5,
-        depth: 0.12,
+        depth: 0.18, // Augmenté de 0.12 à 0.18 pour plus de présence
+        zDepth: 0.25, // Profondeur en Z plus prononcée pour les ombres
         name: 'Classique doré'
     },
     dark_wood: {
@@ -936,7 +940,8 @@ const frameStyles = {
         roughness: 0.8,
         metalness: 0.0,
         envMapIntensity: 0.2,
-        depth: 0.1,
+        depth: 0.15, // Augmenté de 0.1 à 0.15
+        zDepth: 0.22, // Profondeur en Z pour les ombres
         name: 'Bois foncé'
     },
     light_wood: {
@@ -944,7 +949,8 @@ const frameStyles = {
         roughness: 0.7,
         metalness: 0.0,
         envMapIntensity: 0.2,
-        depth: 0.1,
+        depth: 0.15, // Augmenté de 0.1 à 0.15
+        zDepth: 0.22,
         name: 'Bois clair'
     },
     ornate_gold: {
@@ -952,7 +958,8 @@ const frameStyles = {
         roughness: 0.2,
         metalness: 0.9,
         envMapIntensity: 0.6,
-        depth: 0.15,
+        depth: 0.22, // Augmenté de 0.15 à 0.22 pour un cadre orné plus imposant
+        zDepth: 0.3, // Profondeur en Z plus prononcée pour les cadres ornés
         name: 'Orné doré'
     },
     black_modern: {
@@ -960,7 +967,8 @@ const frameStyles = {
         roughness: 0.4,
         metalness: 0.1,
         envMapIntensity: 0.3,
-        depth: 0.08,
+        depth: 0.12, // Augmenté de 0.08 à 0.12 (style moderne reste plus fin)
+        zDepth: 0.18,
         name: 'Moderne noir'
     },
     mahogany: {
@@ -968,7 +976,8 @@ const frameStyles = {
         roughness: 0.6,
         metalness: 0.0,
         envMapIntensity: 0.25,
-        depth: 0.12,
+        depth: 0.18, // Augmenté de 0.12 à 0.18
+        zDepth: 0.25,
         name: 'Acajou'
     },
     silver: {
@@ -976,7 +985,8 @@ const frameStyles = {
         roughness: 0.3,
         metalness: 0.7,
         envMapIntensity: 0.4,
-        depth: 0.1,
+        depth: 0.15, // Augmenté de 0.1 à 0.15
+        zDepth: 0.22,
         name: 'Argent'
     },
     walnut: {
@@ -984,7 +994,8 @@ const frameStyles = {
         roughness: 0.7,
         metalness: 0.0,
         envMapIntensity: 0.2,
-        depth: 0.11,
+        depth: 0.17, // Augmenté de 0.11 à 0.17
+        zDepth: 0.24,
         name: 'Noyer'
     }
 };
@@ -996,6 +1007,161 @@ function getFrameStyle(index) {
     return frameStyles[styleKeys[index % styleKeys.length]];
 }
 
+// Fonction pour créer une texture de bois travaillé
+function createWoodTexture(woodColor, size = 512) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Extraire les composantes RGB de la couleur du bois
+    const r = (woodColor >> 16) & 0xFF;
+    const g = (woodColor >> 8) & 0xFF;
+    const b = woodColor & 0xFF;
+    
+    // Base de couleur du bois
+    context.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    context.fillRect(0, 0, size, size);
+    
+    const imageData = context.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    // Créer des veines de bois horizontales (grain du bois)
+    for (let i = 0; i < data.length; i += 4) {
+        const pixelIndex = i / 4;
+        const x = pixelIndex % size;
+        const y = Math.floor(pixelIndex / size);
+        
+        // Veines de bois avec variations de couleur
+        const grainPattern = Math.sin(y * 0.02 + x * 0.001) * 0.3 + 
+                            Math.sin(y * 0.05) * 0.2 + 
+                            Math.sin(y * 0.1 + x * 0.01) * 0.15;
+        
+        // Variations de couleur pour simuler le grain naturel
+        const colorVariation = grainPattern * 30; // Variation de ±30
+        const darkVariation = Math.sin(x * 0.03) * Math.sin(y * 0.03) * 15; // Zones plus sombres
+        
+        // Appliquer les variations
+        data[i] = Math.max(0, Math.min(255, r + colorVariation - darkVariation));     // R
+        data[i + 1] = Math.max(0, Math.min(255, g + colorVariation * 0.8 - darkVariation)); // G
+        data[i + 2] = Math.max(0, Math.min(255, b + colorVariation * 0.6 - darkVariation)); // B
+        data[i + 3] = 255; // Alpha
+    }
+    
+    context.putImageData(imageData, 0, 0);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 4); // Répéter selon l'orientation (plus de répétition verticale pour le grain)
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+    
+    return texture;
+}
+
+// Fonction pour créer une normal map de bois travaillé (rainures, grain)
+function createWoodNormalMap(size = 512) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Base pour normal map (RGB = 128, 128, 255 = surface plate)
+    context.fillStyle = 'rgb(128, 128, 255)';
+    context.fillRect(0, 0, size, size);
+    
+    const imageData = context.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        const pixelIndex = i / 4;
+        const x = pixelIndex % size;
+        const y = Math.floor(pixelIndex / size);
+        
+        // Grain du bois (rainures horizontales)
+        const grainDepth = Math.sin(y * 0.05) * 12 + Math.sin(y * 0.1) * 6;
+        
+        // Rainures de travail (lignes verticales subtiles pour simuler le rabotage)
+        const toolMarks = Math.sin(x * 0.15) * 4 + Math.sin(x * 0.3) * 2;
+        
+        // Variations aléatoires pour le relief naturel
+        const naturalVariation = (Math.random() - 0.5) * 8;
+        
+        const totalRelief = grainDepth + toolMarks + naturalVariation;
+        
+        // Normal map : R et G pour les directions, B pour la profondeur
+        data[i] = Math.max(100, Math.min(155, 128 + totalRelief * 0.5));     // R (X)
+        data[i + 1] = Math.max(100, Math.min(155, 128 + totalRelief * 0.3)); // G (Y)
+        data[i + 2] = Math.max(240, Math.min(255, 255 - Math.abs(totalRelief) * 0.8)); // B (Z) - relief visible
+        data[i + 3] = 255; // Alpha
+    }
+    
+    context.putImageData(imageData, 0, 0);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 4);
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+    
+    return texture;
+}
+
+// Fonction pour créer une roughness map de bois travaillé
+function createWoodRoughnessMap(size = 512) {
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Base de rugosité pour bois travaillé (légèrement plus rugueux que poli)
+    const baseRoughness = 180; // 0-255, plus élevé = plus rugueux
+    context.fillStyle = `rgb(${baseRoughness}, ${baseRoughness}, ${baseRoughness})`;
+    context.fillRect(0, 0, size, size);
+    
+    const imageData = context.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        const pixelIndex = i / 4;
+        const x = pixelIndex % size;
+        const y = Math.floor(pixelIndex / size);
+        
+        // Variations selon le grain du bois (zones plus lisses vs plus rugueuses)
+        const grainRoughness = Math.sin(y * 0.05) * 20; // Variations selon le grain
+        
+        // Zones de travail (rainures plus rugueuses)
+        const toolRoughness = Math.sin(x * 0.15) * 10;
+        
+        // Variations aléatoires subtiles
+        const randomVariation = (Math.random() - 0.5) * 15;
+        
+        const totalRoughness = baseRoughness + grainRoughness + toolRoughness + randomVariation;
+        const roughness = Math.max(160, Math.min(220, totalRoughness)); // Limiter entre 160 et 220
+        
+        data[i] = roughness;
+        data[i + 1] = roughness;
+        data[i + 2] = roughness;
+        data[i + 3] = 255;
+    }
+    
+    context.putImageData(imageData, 0, 0);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(2, 4);
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
+    texture.needsUpdate = true;
+    
+    return texture;
+}
+
 // Fonction pour créer un cadre avec un style spécifique
 function createFrame(width, height, style = null) {
     const frameGroup = new THREE.Group();
@@ -1005,17 +1171,37 @@ function createFrame(width, height, style = null) {
         style = frameStyles.dark_wood;
     }
     
-    const depth = style.depth || 0.1;
+    const depth = style.depth || 0.15; // Largeur des côtés du cadre
+    const zDepth = style.zDepth || depth * 1.4; // Profondeur en Z (plus prononcée pour les ombres)
+    
+    // Créer les textures de bois travaillé pour les cadres en bois
+    const isWoodFrame = style.metalness < 0.5; // Cadres en bois (metalness faible)
+    let woodTexture = null;
+    let woodNormalMap = null;
+    let woodRoughnessMap = null;
+    
+    if (isWoodFrame) {
+        woodTexture = createWoodTexture(style.color);
+        woodNormalMap = createWoodNormalMap();
+        woodRoughnessMap = createWoodRoughnessMap();
+    }
+    
     const frameMaterial = new THREE.MeshStandardMaterial({
         color: style.color,
         roughness: style.roughness,
         metalness: style.metalness,
-        envMapIntensity: style.envMapIntensity
+        envMapIntensity: style.envMapIntensity,
+        // Ajouter les textures de bois si c'est un cadre en bois
+        map: isWoodFrame ? woodTexture : null,
+        normalMap: isWoodFrame ? woodNormalMap : null,
+        normalScale: isWoodFrame ? new THREE.Vector2(0.8, 0.8) : null,
+        roughnessMap: isWoodFrame ? woodRoughnessMap : null
     });
     
-    // Créer les 4 côtés du cadre
+    // Créer les 4 côtés du cadre avec une profondeur en Z plus prononcée
+    // Pour les cadres en bois, le grain suit naturellement la longueur de chaque côté
     const topFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(width + depth * 2, depth, depth),
+        new THREE.BoxGeometry(width + depth * 2, depth, zDepth),
         frameMaterial
     );
     topFrame.position.set(0, height / 2 + depth / 2, 0);
@@ -1024,7 +1210,7 @@ function createFrame(width, height, style = null) {
     frameGroup.add(topFrame);
     
     const bottomFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(width + depth * 2, depth, depth),
+        new THREE.BoxGeometry(width + depth * 2, depth, zDepth),
         frameMaterial
     );
     bottomFrame.position.set(0, -height / 2 - depth / 2, 0);
@@ -1033,7 +1219,7 @@ function createFrame(width, height, style = null) {
     frameGroup.add(bottomFrame);
     
     const leftFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(depth, height, depth),
+        new THREE.BoxGeometry(depth, height, zDepth),
         frameMaterial
     );
     leftFrame.position.set(-width / 2 - depth / 2, 0, 0);
@@ -1042,7 +1228,7 @@ function createFrame(width, height, style = null) {
     frameGroup.add(leftFrame);
     
     const rightFrame = new THREE.Mesh(
-        new THREE.BoxGeometry(depth, height, depth),
+        new THREE.BoxGeometry(depth, height, zDepth),
         frameMaterial
     );
     rightFrame.position.set(width / 2 + depth / 2, 0, 0);
@@ -1052,9 +1238,9 @@ function createFrame(width, height, style = null) {
     
     // Pour les cadres ornés, ajouter des détails supplémentaires
     if (style.name === 'Orné doré') {
-        // Ajouter des coins décoratifs
+        // Ajouter des coins décoratifs avec la même profondeur en Z
         const cornerDetail = new THREE.Mesh(
-            new THREE.BoxGeometry(depth * 1.5, depth * 1.5, depth * 1.2),
+            new THREE.BoxGeometry(depth * 1.5, depth * 1.5, zDepth * 1.1),
             frameMaterial
         );
         
@@ -1532,15 +1718,15 @@ function createGalleryCeiling() {
 function createEnvironmentMap() {
     // Créer une texture d'environnement équirectangulaire haute résolution
     // qui simule fidèlement l'environnement de la galerie (murs, plafond, sol, lumières)
-    const size = 512; // Résolution augmentée pour plus de détails
+    const size = 1024; // Résolution augmentée à 1024x512 pour plus de détails
     const canvas = document.createElement('canvas');
-    canvas.width = size * 2; // Format équirectangulaire : 2:1
+    canvas.width = size * 2; // Format équirectangulaire : 2:1 (2048x1024)
     canvas.height = size;
     const context = canvas.getContext('2d');
     
-    // Couleurs de l'environnement
-    const wallColor = '#f5f5f0'; // Murs (blanc cassé musée)
-    const ceilingColor = '#fafafa'; // Plafond (plus clair)
+    // Couleurs de l'environnement (mise à jour avec les nouvelles couleurs de mur)
+    const wallColor = '#f7f5f0'; // Murs (blanc cassé musée - couleur mise à jour)
+    const ceilingColor = '#ffffff'; // Plafond (blanc pur)
     const floorColor = '#c9a961'; // Sol (parquet)
     const lightColor = '#fff8e6'; // Couleur des spots (4000K)
     
@@ -1552,20 +1738,26 @@ function createEnvironmentMap() {
     const floorStart = size * 0.6; // Le sol commence à 60% de la hauteur
     const floorGradient = context.createLinearGradient(0, floorStart, 0, size);
     floorGradient.addColorStop(0, wallColor);
-    floorGradient.addColorStop(0.3, '#d4b873'); // Transition
-    floorGradient.addColorStop(1, floorColor);
+    floorGradient.addColorStop(0.2, '#e0c88a'); // Transition plus douce
+    floorGradient.addColorStop(0.4, '#d4b873'); // Transition
+    floorGradient.addColorStop(0.7, '#c9a961'); // Couleur de base du parquet
+    floorGradient.addColorStop(1, '#b8954f'); // Plus sombre au premier plan
     context.fillStyle = floorGradient;
     context.fillRect(0, floorStart, canvas.width, size - floorStart);
     
-    // Ajouter un motif de parquet subtil dans le reflet du sol
+    // Ajouter un motif de parquet plus détaillé dans le reflet du sol
     context.strokeStyle = '#b8954f';
-    context.lineWidth = 0.5;
-    const tileSize = 20;
+    context.lineWidth = 1;
+    const tileSize = 30; // Lames de parquet plus grandes pour plus de réalisme
     for (let x = 0; x < canvas.width; x += tileSize) {
         context.beginPath();
         context.moveTo(x, floorStart);
         context.lineTo(x, size);
         context.stroke();
+        
+        // Ajouter des variations de couleur pour les lames de parquet
+        context.fillStyle = `rgba(184, 149, 79, ${0.1 + Math.sin(x / 50) * 0.05})`;
+        context.fillRect(x, floorStart, tileSize, size - floorStart);
     }
     for (let y = floorStart; y < size; y += tileSize) {
         context.beginPath();
@@ -1574,15 +1766,17 @@ function createEnvironmentMap() {
         context.stroke();
     }
     
-    // Dessiner le plafond (partie supérieure)
+    // Dessiner le plafond (partie supérieure) avec plus de détails
     const ceilingEnd = size * 0.15; // Le plafond occupe les 15% supérieurs
     const ceilingGradient = context.createLinearGradient(0, 0, 0, ceilingEnd);
-    ceilingGradient.addColorStop(0, ceilingColor);
-    ceilingGradient.addColorStop(1, wallColor);
+    ceilingGradient.addColorStop(0, ceilingColor); // Blanc pur au centre
+    ceilingGradient.addColorStop(0.3, '#fafafa'); // Transition douce
+    ceilingGradient.addColorStop(0.7, '#f5f5f0'); // Vers les murs
+    ceilingGradient.addColorStop(1, wallColor); // Couleur des murs
     context.fillStyle = ceilingGradient;
     context.fillRect(0, 0, canvas.width, ceilingEnd);
     
-    // Ajouter les spots lumineux au plafond (reflets des lumières)
+    // Ajouter les spots lumineux au plafond (reflets des lumières) - plus détaillés
     // Utiliser le nombre réel de spots si disponible, sinon 3 par défaut
     const numSpots = spotLights.length > 0 ? spotLights.length : 3;
     const spotSpacing = canvas.width / (numSpots + 1);
@@ -1590,62 +1784,90 @@ function createEnvironmentMap() {
         const spotX = i * spotSpacing;
         const spotY = ceilingEnd * 0.5;
         
-        // Cône de lumière des spots - plus intense et visible
-        const lightGradient = context.createRadialGradient(spotX, spotY, 0, spotX, spotY, 120);
+        // Cône de lumière des spots - plus réaliste avec plusieurs couches
+        const lightGradient = context.createRadialGradient(spotX, spotY, 0, spotX, spotY, 200);
         lightGradient.addColorStop(0, '#ffffff'); // Centre blanc pur pour reflets intenses
-        lightGradient.addColorStop(0.2, lightColor);
-        lightGradient.addColorStop(0.4, '#fff4e6');
-        lightGradient.addColorStop(0.7, '#f5f5f0');
+        lightGradient.addColorStop(0.15, '#fffef8'); // Très proche du centre
+        lightGradient.addColorStop(0.3, lightColor); // Couleur des spots
+        lightGradient.addColorStop(0.5, '#fff4e6'); // Transition
+        lightGradient.addColorStop(0.7, '#faf8f3'); // Vers l'extérieur
+        lightGradient.addColorStop(0.85, '#f5f5f0'); // Proche des murs
         lightGradient.addColorStop(1, 'transparent');
         
         context.fillStyle = lightGradient;
         context.beginPath();
-        context.arc(spotX, spotY, 120, 0, Math.PI * 2);
+        context.arc(spotX, spotY, 200, 0, Math.PI * 2);
         context.fill();
         
         // Point lumineux central - plus grand et plus visible
         context.fillStyle = '#ffffff';
         context.beginPath();
-        context.arc(spotX, spotY, 8, 0, Math.PI * 2);
+        context.arc(spotX, spotY, 12, 0, Math.PI * 2);
         context.fill();
         
-        // Halo lumineux autour du point central
-        const haloGradient = context.createRadialGradient(spotX, spotY, 0, spotX, spotY, 20);
-        haloGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-        haloGradient.addColorStop(1, 'transparent');
-        context.fillStyle = haloGradient;
+        // Halo lumineux autour du point central - plusieurs couches
+        const haloGradient1 = context.createRadialGradient(spotX, spotY, 0, spotX, spotY, 30);
+        haloGradient1.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        haloGradient1.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+        haloGradient1.addColorStop(1, 'transparent');
+        context.fillStyle = haloGradient1;
         context.beginPath();
-        context.arc(spotX, spotY, 20, 0, Math.PI * 2);
+        context.arc(spotX, spotY, 30, 0, Math.PI * 2);
+        context.fill();
+        
+        // Halo externe plus doux
+        const haloGradient2 = context.createRadialGradient(spotX, spotY, 20, spotX, spotY, 60);
+        haloGradient2.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+        haloGradient2.addColorStop(1, 'transparent');
+        context.fillStyle = haloGradient2;
+        context.beginPath();
+        context.arc(spotX, spotY, 60, 0, Math.PI * 2);
         context.fill();
     }
     
-    // Ajouter des reflets subtils des murs latéraux
+    // Ajouter des reflets subtils des murs latéraux avec plus de variations
     // Côtés gauche et droit (dans une projection équirectangulaire)
     const sideGradient = context.createLinearGradient(0, 0, canvas.width, 0);
     sideGradient.addColorStop(0, '#e8e8e3'); // Mur gauche (plus sombre)
-    sideGradient.addColorStop(0.25, wallColor);
-    sideGradient.addColorStop(0.75, wallColor);
+    sideGradient.addColorStop(0.1, '#ecece7'); // Transition
+    sideGradient.addColorStop(0.25, wallColor); // Couleur principale
+    sideGradient.addColorStop(0.5, wallColor); // Centre
+    sideGradient.addColorStop(0.75, wallColor); // Couleur principale
+    sideGradient.addColorStop(0.9, '#ecece7'); // Transition
     sideGradient.addColorStop(1, '#e8e8e3'); // Mur droit (plus sombre)
     
     context.fillStyle = sideGradient;
-    context.globalAlpha = 0.3;
+    context.globalAlpha = 0.35; // Légèrement plus visible
     context.fillRect(0, ceilingEnd, canvas.width, floorStart - ceilingEnd);
     context.globalAlpha = 1.0;
     
-    // Ajouter des variations subtiles de lumière (fenêtres, éclairage naturel)
-    const windowGradient = context.createLinearGradient(canvas.width * 0.3, 0, canvas.width * 0.7, 0);
+    // Ajouter des variations subtiles de lumière (fenêtres, éclairage naturel) - plus réalistes
+    const windowGradient = context.createLinearGradient(canvas.width * 0.25, 0, canvas.width * 0.75, 0);
     windowGradient.addColorStop(0, 'transparent');
-    windowGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)'); // Fenêtre lumineuse
+    windowGradient.addColorStop(0.3, 'rgba(255, 255, 255, 0.08)'); // Début de la fenêtre
+    windowGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)'); // Centre lumineux
+    windowGradient.addColorStop(0.7, 'rgba(255, 255, 255, 0.08)'); // Fin de la fenêtre
     windowGradient.addColorStop(1, 'transparent');
     
     context.fillStyle = windowGradient;
-    context.fillRect(0, ceilingEnd, canvas.width, (floorStart - ceilingEnd) * 0.5);
+    context.fillRect(0, ceilingEnd, canvas.width, (floorStart - ceilingEnd) * 0.6);
     
-    // Ajouter un peu de grain/texture pour plus de réalisme
+    // Ajouter des ombres subtiles pour plus de profondeur
+    const shadowGradient = context.createLinearGradient(0, floorStart * 0.8, 0, floorStart);
+    shadowGradient.addColorStop(0, 'transparent');
+    shadowGradient.addColorStop(1, 'rgba(0, 0, 0, 0.05)'); // Ombre très subtile
+    context.fillStyle = shadowGradient;
+    context.fillRect(0, ceilingEnd, canvas.width, floorStart - ceilingEnd);
+    
+    // Ajouter un grain/texture plus subtil pour plus de réalisme
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
-        const noise = (Math.random() - 0.5) * 3; // Grain très subtil
+        // Utiliser le bruit de Perlin pour un grain plus naturel
+        const pixelIndex = i / 4;
+        const x = pixelIndex % canvas.width;
+        const y = Math.floor(pixelIndex / canvas.width);
+        const noise = perlinNoise2D(x * 0.05, y * 0.05) * 4 - 2; // Grain subtil et naturel
         data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R
         data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G
         data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise)); // B
@@ -1665,8 +1887,68 @@ function createEnvironmentMap() {
 // Fonction pour créer une normal map de grain de toile
 // Simule la texture dense et serrée de la toile sous la peinture et le vernis
 // Les toiles de qualité ont un tissage très dense avec un relief visible
+// Fonction de bruit de Perlin simplifié pour les micro-variations naturelles
+function perlinNoise2D(x, y, seed = 0) {
+    // Table de permutation simplifiée
+    const p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,
+        140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,
+        247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,
+        57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,
+        74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,
+        60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,
+        65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,
+        200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,
+        52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,
+        207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,
+        119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,
+        129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,
+        218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,
+        81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,
+        184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,
+        222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+    
+    // Fonction de hash
+    const hash = (n) => p[n % 256];
+    
+    // Interpolation linéaire
+    const lerp = (a, b, t) => a + t * (b - a);
+    
+    // Fonction de fade (courbe de transition douce)
+    const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+    
+    // Coordonnées de la grille
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    
+    // Coordonnées fractionnaires
+    const fx = x - Math.floor(x);
+    const fy = y - Math.floor(y);
+    
+    // Valeurs de gradient aux 4 coins
+    const u = fade(fx);
+    const v = fade(fy);
+    
+    // Gradients simplifiés
+    const grad = (hash, x, y) => {
+        const h = hash & 3;
+        return h === 0 ? x : h === 1 ? -x : h === 2 ? y : -y;
+    };
+    
+    const a = hash(X + hash(Y));
+    const b = hash(X + 1 + hash(Y));
+    const c = hash(X + hash(Y + 1));
+    const d = hash(X + 1 + hash(Y + 1));
+    
+    // Interpolation bilinéaire
+    return lerp(
+        lerp(grad(a, fx, fy), grad(b, fx - 1, fy), u),
+        lerp(grad(c, fx, fy - 1), grad(d, fx - 1, fy - 1), u),
+        v
+    ) * 0.5 + 0.5; // Normaliser entre 0 et 1
+}
+
 function createCanvasNormalMap() {
-    const size = 1024; // Résolution augmentée pour un tissage plus fin et dense
+    const size = 2048; // Résolution augmentée à 2048x2048 pour plus de détails
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
@@ -1715,22 +1997,34 @@ function createCanvasNormalMap() {
         context.fillRect(x, 0, threadSize, size);
     }
     
-    // Ajouter des variations subtiles pour simuler l'irrégularité naturelle de la toile
+    // Ajouter des variations subtiles avec bruit de Perlin pour simuler l'irrégularité naturelle de la toile
     const imageData = context.getImageData(0, 0, size, size);
     const data = imageData.data;
     
+    // Paramètres du bruit de Perlin pour les micro-variations
+    const noiseScale = 0.1; // Échelle du bruit (plus petit = variations plus fines)
+    const noiseIntensity = 6; // Intensité du bruit (amplitude des variations)
+    
     for (let i = 0; i < data.length; i += 4) {
-        // Générer un bruit subtil pour simuler les micro-variations de la toile
-        const noise = (Math.random() - 0.5) * 8; // Bruit subtil pour le réalisme
+        const pixelIndex = i / 4;
+        const x = pixelIndex % size;
+        const y = Math.floor(pixelIndex / size);
+        
+        // Générer du bruit de Perlin à plusieurs octaves pour plus de réalisme
+        const noise1 = perlinNoise2D(x * noiseScale, y * noiseScale) * noiseIntensity;
+        const noise2 = perlinNoise2D(x * noiseScale * 2, y * noiseScale * 2) * (noiseIntensity * 0.5);
+        const noise3 = perlinNoise2D(x * noiseScale * 4, y * noiseScale * 4) * (noiseIntensity * 0.25);
+        const totalNoise = noise1 + noise2 + noise3;
         
         // Ajuster les valeurs RGB pour créer une normal map
         // R et G représentent les directions X et Y de la normale
         // B représente la profondeur (Z) - valeurs plus basses = plus de relief
-        data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R (X)
-        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G (Y)
+        data[i] = Math.max(0, Math.min(255, data[i] + totalNoise));     // R (X)
+        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + totalNoise)); // G (Y)
         // B (Z) : valeurs plus basses créent plus de relief visible
         // Pour un tissage dense avec relief prononcé, on garde des valeurs plus basses
-        data[i + 2] = Math.max(160, Math.min(255, data[i + 2] + noise * 0.5)); // B (Z) - relief plus prononcé
+        // Le bruit affecte moins le canal Z pour préserver la structure du tissage
+        data[i + 2] = Math.max(155, Math.min(255, data[i + 2] + totalNoise * 0.3)); // B (Z) - relief naturel avec variations subtiles
     }
     
     context.putImageData(imageData, 0, 0);
@@ -1742,6 +2036,89 @@ function createCanvasNormalMap() {
     texture.repeat.set(3, 3); // Répéter la texture pour un tissage dense sur tout le tableau
     texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
     texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
+    texture.needsUpdate = true;
+    
+    return texture;
+}
+
+// Fonction pour créer une normal map de coups de pinceau (optionnel)
+// Simule les coups de pinceau visibles sur certaines peintures
+function createBrushStrokeNormalMap() {
+    const size = 1024;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+    
+    // Remplir avec une couleur neutre (128, 128, 255 pour normal map)
+    context.fillStyle = 'rgb(128, 128, 255)';
+    context.fillRect(0, 0, size, size);
+    
+    // Générer des coups de pinceau avec des courbes et variations de direction
+    const numStrokes = 50; // Nombre de coups de pinceau
+    const strokeDepth = 15; // Profondeur du relief des coups de pinceau
+    
+    context.strokeStyle = `rgb(${128 - strokeDepth}, ${128 - strokeDepth}, ${255 - strokeDepth})`;
+    context.lineWidth = 8; // Largeur des coups de pinceau
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    
+    for (let i = 0; i < numStrokes; i++) {
+        // Position de départ aléatoire
+        const startX = Math.random() * size;
+        const startY = Math.random() * size;
+        
+        // Longueur et direction du coup de pinceau
+        const length = 50 + Math.random() * 150;
+        const angle = Math.random() * Math.PI * 2;
+        
+        // Position d'arrivée
+        const endX = startX + Math.cos(angle) * length;
+        const endY = startY + Math.sin(angle) * length;
+        
+        // Créer une courbe de Bézier pour un coup de pinceau plus naturel
+        const controlX = startX + (endX - startX) * 0.5 + (Math.random() - 0.5) * 30;
+        const controlY = startY + (endY - startY) * 0.5 + (Math.random() - 0.5) * 30;
+        
+        context.beginPath();
+        context.moveTo(startX, startY);
+        context.quadraticCurveTo(controlX, controlY, endX, endY);
+        context.stroke();
+        
+        // Ajouter des variations de largeur pour plus de réalisme
+        const widthVariation = 2 + Math.random() * 4;
+        context.lineWidth = widthVariation;
+    }
+    
+    // Ajouter des variations subtiles avec bruit de Perlin
+    const imageData = context.getImageData(0, 0, size, size);
+    const data = imageData.data;
+    
+    const noiseScale = 0.15;
+    const noiseIntensity = 4;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        const pixelIndex = i / 4;
+        const x = pixelIndex % size;
+        const y = Math.floor(pixelIndex / size);
+        
+        // Bruit de Perlin pour des variations naturelles
+        const noise = perlinNoise2D(x * noiseScale, y * noiseScale) * noiseIntensity - noiseIntensity * 0.5;
+        
+        data[i] = Math.max(0, Math.min(255, data[i] + noise));     // R (X)
+        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise)); // G (Y)
+        data[i + 2] = Math.max(170, Math.min(255, data[i + 2] + noise * 0.5)); // B (Z) - relief modéré
+    }
+    
+    context.putImageData(imageData, 0, 0);
+    
+    // Convertir en texture
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(1, 1); // Ne pas répéter pour un motif unique
+    texture.generateMipmaps = false;
+    texture.minFilter = THREE.LinearFilter;
     texture.needsUpdate = true;
     
     return texture;
@@ -1834,6 +2211,9 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                 // Créer la normal map de la toile (partagée entre toutes les couches)
                 // Cette normal map représente le tissage dense de la toile
                 const canvasNormalMap = createCanvasNormalMap();
+                
+                // Créer la roughness map pour varier la rugosité selon la texture de la toile
+                const canvasRoughnessMap = createCanvasRoughnessMap();
                 
                 // Créer l'environment map pour les reflets du vernis
                 const envMap = createEnvironmentMap();
@@ -1986,17 +2366,18 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                 const paintMaterial = new THREE.MeshPhysicalMaterial({
                     map: saturatedTexture, // Texture avec saturation augmentée pour des couleurs plus vives
                     side: THREE.FrontSide,
-                    roughness: 0.25, // Rugosité très réduite pour des couleurs très vives et éclatantes
+                    roughness: 0.35, // Rugosité de base ajustée (variera selon la roughness map)
+                    roughnessMap: canvasRoughnessMap, // Texture de rugosité pour varier selon la texture de la toile
                     metalness: 0.0,
                     normalMap: canvasNormalMap,
                     normalScale: new THREE.Vector2(0.5, 0.5), // Relief plus visible pour montrer la texture de la toile
                     // Propriétés du vernis (clearcoat) - intégré dans le matériau pour un rendu réaliste
                     clearcoat: 1.0, // Couche de vernis complète et épaisse
-                    clearcoatRoughness: 0.01, // Vernis encore plus lisse et brillant (presque miroir)
+                    clearcoatRoughness: 0.005, // Vernis très lisse (0.005 = presque miroir, comme un vernis d'artiste de qualité)
                     // Propriétés de réflexion - le vernis réfléchit l'environnement
-                    reflectivity: 0.3, // Réflexion plus prononcée pour un vernis réaliste
-                    ior: 1.5, // Indice de réfraction du vernis (identique au verre)
-                    envMapIntensity: 0.8, // Intensité accrue des reflets pour bien voir l'environnement dans le vernis
+                    reflectivity: 0.3, // Réflexion modérée pour un vernis réaliste (entre 0.25 et 0.35)
+                    ior: 1.48, // Indice de réfraction du vernis d'artiste (légèrement inférieur au verre, entre 1.45 et 1.5)
+                    envMapIntensity: 0.85, // Intensité optimisée des reflets pour bien voir l'environnement dans le vernis (entre 0.7 et 0.9)
                     transmission: 0.0, // Pas de transmission
                     thickness: 0.0 // Pas d'épaisseur
                 });
@@ -2232,7 +2613,9 @@ function positionPainting() {
         
         // Positionner le cadre
         paintingFrame.position.copy(painting.position);
-        paintingFrame.position.z = painting.position.z - 0.01; // Légèrement devant le tableau
+        // Le cadre est positionné légèrement devant le tableau pour créer un effet de profondeur
+        // La profondeur en Z du cadre crée des ombres plus prononcées
+        paintingFrame.position.z = painting.position.z - 0.015; // Légèrement devant le tableau
         paintingFrame.rotation.copy(painting.rotation);
         
         // Retirer le chevalet de la scène si présent
@@ -2269,7 +2652,9 @@ function positionPainting() {
         
         // Positionner le cadre
         paintingFrame.position.copy(painting.position);
-        paintingFrame.position.z = painting.position.z - 0.01; // Légèrement devant le tableau
+        // Le cadre est positionné légèrement devant le tableau pour créer un effet de profondeur
+        // La profondeur en Z du cadre crée des ombres plus prononcées
+        paintingFrame.position.z = painting.position.z - 0.015; // Légèrement devant le tableau
         paintingFrame.rotation.copy(painting.rotation);
         
         // Ajouter le chevalet à la scène
@@ -2539,18 +2924,81 @@ function updateLightIntensity(intensity) {
     const config = lightConfigurations[currentLightConfigName];
     if (!config) return;
     
-    // Mettre à jour selon le type de configuration
-    if (config.spots && config.spots.enabled && spotLights.length > 0) {
-        // Configuration avec spots
-        spotLights.forEach(spot => {
-            spot.intensity = intensity;
-        });
-    } else if (config.directionalLight && config.directionalLight.enabled && directionalLight) {
-        // Configuration avec lumière directionnelle
-        directionalLight.intensity = intensity;
-    } else if (config.areaLight && config.areaLight.enabled && areaLight) {
-        // Configuration avec lumière de zone
-        areaLight.intensity = intensity;
+    // Si l'intensité est à 0, éteindre toutes les lumières et réduire drastiquement l'exposition
+    if (intensity === 0 || intensity < 0.01) {
+        // Éteindre tous les spots
+        if (spotLights.length > 0) {
+            spotLights.forEach(spot => {
+                spot.intensity = 0;
+            });
+        }
+        
+        // Éteindre la lumière directionnelle si elle existe
+        if (directionalLight) {
+            directionalLight.intensity = 0;
+        }
+        
+        // Éteindre la lumière de zone si elle existe
+        if (areaLight) {
+            areaLight.intensity = 0;
+        }
+        
+        // Éteindre aussi la lumière ambiante et fill light pour un vrai noir
+        if (ambientLight) {
+            ambientLight.intensity = 0;
+        }
+        if (fillLight) {
+            fillLight.intensity = 0;
+        }
+        
+        // Réduire drastiquement l'exposition pour que la scène soit vraiment sombre
+        if (renderer) {
+            renderer.toneMappingExposure = 0.1; // Exposition très faible pour un vrai noir
+        }
+    } else {
+        // Intensité normale : mettre à jour selon le type de configuration
+        if (config.spots && config.spots.enabled && spotLights.length > 0) {
+            // Configuration avec spots
+            spotLights.forEach(spot => {
+                spot.intensity = intensity;
+            });
+        } else if (config.directionalLight && config.directionalLight.enabled && directionalLight) {
+            // Configuration avec lumière directionnelle
+            directionalLight.intensity = intensity;
+        } else if (config.areaLight && config.areaLight.enabled && areaLight) {
+            // Configuration avec lumière de zone
+            areaLight.intensity = intensity;
+        }
+        
+        // S'assurer que les lumières ambiante et fill restent éteintes en mode spotOnlyMode
+        if (spotOnlyMode) {
+            if (ambientLight) {
+                ambientLight.intensity = 0;
+            }
+            if (fillLight) {
+                fillLight.intensity = 0;
+            }
+        }
+        
+        // Ajuster l'exposition proportionnellement à l'intensité pour un contrôle plus fin
+        // L'exposition augmente progressivement avec l'intensité
+        if (renderer) {
+            if (spotOnlyMode) {
+                // En mode spotOnlyMode : exposition proportionnelle à l'intensité (de 0.1 à 1.8)
+                const minExposure = 0.1;
+                const maxExposure = 1.8;
+                const maxIntensity = parseFloat(document.getElementById('spot-intensity-slider')?.max || 3);
+                const normalizedIntensity = Math.min(intensity / maxIntensity, 1.0);
+                renderer.toneMappingExposure = minExposure + (maxExposure - minExposure) * normalizedIntensity;
+            } else {
+                // En mode normal : exposition proportionnelle (de 0.1 à 2.2)
+                const minExposure = 0.1;
+                const maxExposure = 2.2;
+                const maxIntensity = parseFloat(document.getElementById('spot-intensity-slider')?.max || 3);
+                const normalizedIntensity = Math.min(intensity / maxIntensity, 1.0);
+                renderer.toneMappingExposure = minExposure + (maxExposure - minExposure) * normalizedIntensity;
+            }
+        }
     }
     
     // Mettre à jour l'affichage de la valeur
@@ -2752,6 +3200,63 @@ function toggleSpotOnlyMode(enabled) {
     }
 }
 
+// Fonction pour basculer l'affichage des overlays
+function toggleOverlays() {
+    const container = document.getElementById('canvas-container');
+    if (container) {
+        container.classList.toggle('overlays-hidden');
+    }
+}
+
+// Fonction pour basculer le mode plein écran
+function toggleFullscreen() {
+    const container = document.getElementById('canvas-container');
+    if (!container) return;
+    
+    // Vérifier si on est déjà en plein écran
+    if (!document.fullscreenElement && 
+        !document.webkitFullscreenElement && 
+        !document.mozFullScreenElement && 
+        !document.msFullscreenElement) {
+        // Entrer en plein écran
+        if (container.requestFullscreen) {
+            container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+        } else if (container.mozRequestFullScreen) {
+            container.mozRequestFullScreen();
+        } else if (container.msRequestFullscreen) {
+            container.msRequestFullscreen();
+        }
+    } else {
+        // Sortir du plein écran
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+}
+
+// Mettre à jour l'icône du bouton plein écran selon l'état
+function updateFullscreenButton() {
+    const fullscreenBtn = document.getElementById('toggle-fullscreen');
+    if (!fullscreenBtn) return;
+    
+    const isFullscreen = !!(document.fullscreenElement || 
+                            document.webkitFullscreenElement || 
+                            document.mozFullScreenElement || 
+                            document.msFullscreenElement);
+    
+    // Changer l'icône : ⛶ pour plein écran, ⛶ pour sortir
+    fullscreenBtn.textContent = isFullscreen ? '⛶' : '⛶';
+    fullscreenBtn.title = isFullscreen ? 'Sortir du plein écran (F)' : 'Plein écran (F)';
+}
+
 // Fonction pour basculer l'affichage des helpers
 function toggleHelpers(enabled) {
     showHelpers = enabled;
@@ -2846,10 +3351,40 @@ function setupEventListeners() {
         });
     }
     
-    // Fermeture avec ESC
+    // Toggle overlays
+    const toggleOverlaysBtn = document.getElementById('toggle-overlays');
+    if (toggleOverlaysBtn) {
+        toggleOverlaysBtn.addEventListener('click', toggleOverlays);
+    }
+    
+    // Toggle fullscreen
+    const toggleFullscreenBtn = document.getElementById('toggle-fullscreen');
+    if (toggleFullscreenBtn) {
+        toggleFullscreenBtn.addEventListener('click', toggleFullscreen);
+    }
+    
+    // Écouter les changements d'état du plein écran pour mettre à jour l'icône
+    document.addEventListener('fullscreenchange', updateFullscreenButton);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+    document.addEventListener('mozfullscreenchange', updateFullscreenButton);
+    document.addEventListener('MSFullscreenChange', updateFullscreenButton);
+    
+    // Fermeture avec ESC, toggle overlays avec H, plein écran avec F
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            closeGallery3D();
+            // Si on est en plein écran, sortir du plein écran avant de fermer
+            if (document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement || 
+                document.msFullscreenElement) {
+                toggleFullscreen();
+            } else {
+                closeGallery3D();
+            }
+        } else if (e.key === 'h' || e.key === 'H') {
+            toggleOverlays();
+        } else if (e.key === 'f' || e.key === 'F') {
+            toggleFullscreen();
         }
     });
 }

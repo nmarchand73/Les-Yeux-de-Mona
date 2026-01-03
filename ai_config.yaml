@@ -1,0 +1,53 @@
+# Configuration pour l'API OpenAI
+# Ce fichier contient le prompt et les paramètres pour générer les informations sur les œuvres
+
+# Configuration de l'API OpenAI
+openai:
+  model: "gpt-4o-mini"
+  max_tokens: 2000
+  temperature: 0.7
+  timeout: 60  # secondes
+
+# Prompt système (rôle de l'IA)
+system_prompt: |
+  Tu es un expert en histoire de l'art spécialisé dans l'analyse d'œuvres d'art. 
+  Tu fournis des informations détaillées, précises et enrichies. 
+  Tu réponds toujours en Markdown bien formaté.
+
+# Template du prompt utilisateur
+# Les variables suivantes seront remplacées :
+# - {titre} : Titre de l'œuvre
+# - {artiste} : Nom de l'artiste
+# - {date} : Date de l'œuvre
+# - {musee} : Musée où se trouve l'œuvre
+# - {techniques} : Liste des techniques (optionnel)
+user_prompt_template: |
+  Tu es un expert en histoire de l'art. Fournis des informations détaillées et enrichies sur l'œuvre suivante :
+
+  Titre: {titre}
+  Artiste: {artiste}
+  Date: {date}
+  Musée: {musee}
+  {techniques}
+
+  Fournis des informations sur :
+  1. Le contexte historique et artistique de cette œuvre
+  2. L'importance de cette œuvre dans la carrière de l'artiste
+  3. Les techniques et innovations utilisées
+  4. L'influence et l'héritage de cette œuvre
+  5. Des détails intéressants ou des anecdotes
+
+  Réponds en français, de manière claire et structurée, en environ 500-800 mots. Utilise le format Markdown pour structurer ta réponse avec des titres, des listes, etc.
+
+# Template pour "Ce qu'il faut voir"
+# Même structure que le prompt principal mais adapté pour guider l'observation
+ce_quil_faut_voir_template: |
+  Pour l'œuvre "{titre}" de {artiste}, fournis un guide d'observation détaillé qui aide le spectateur à voir et comprendre les éléments importants de l'œuvre.
+  
+  Structure ta réponse en Markdown avec des sections claires. Pour chaque élément à observer, explique :
+  - Ce qu'il faut regarder précisément
+  - Pourquoi c'est important
+  - Comment cela contribue à la compréhension de l'œuvre
+  
+  Réponds en français, de manière claire et structurée, en environ 300-500 mots. Utilise le format Markdown avec des titres, des listes à puces, et des paragraphes courts pour faciliter la lecture.
+

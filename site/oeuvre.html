@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Œuvre - Les Yeux de Mona</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
         .oeuvre-page {
@@ -59,22 +62,23 @@
         }
         
         .oeuvre-title {
-            font-family: 'Crimson Pro', 'Lora', serif;
-            font-size: 2.25rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 2rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
             color: var(--color-accent);
-            line-height: 1.3;
-            letter-spacing: 0.01em;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
         }
         
         .oeuvre-artist {
-            font-family: 'Lora', 'Crimson Pro', serif;
-            font-size: 1.35rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 1.1rem;
             color: var(--color-text-light);
-            margin-bottom: 1rem;
-            font-style: italic;
+            margin-bottom: 0.75rem;
+            font-style: normal;
             font-weight: 400;
+            letter-spacing: 0;
         }
         
         .oeuvre-meta {
@@ -102,8 +106,8 @@
         }
         
         .meta-value {
-            font-family: 'Lora', 'Crimson Pro', serif;
-            font-size: 1rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
             color: var(--color-text);
             font-weight: 400;
         }
@@ -121,6 +125,134 @@
         
         .oeuvre-link:hover {
             background: var(--color-accent-light);
+        }
+        
+        .ai-info-btn {
+            margin-top: 1rem;
+            padding: 0.875rem 1.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ai-info-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .ai-info-btn:hover::before {
+            left: 100%;
+        }
+        
+        .ai-info-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+        }
+        
+        .ai-info-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+        }
+        
+        .ai-info-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .ai-info-btn:disabled:hover {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+        }
+        
+        .ai-info-btn.success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            box-shadow: 0 2px 8px rgba(39, 174, 96, 0.25);
+        }
+        
+        .ai-info-btn.success:hover {
+            box-shadow: 0 6px 16px rgba(39, 174, 96, 0.35);
+        }
+        
+        .btn-regenerate {
+            margin-top: 1rem;
+            padding: 0.625rem 1.25rem;
+            background: var(--color-surface);
+            color: var(--color-accent);
+            border: 2px solid var(--color-accent);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 1px 4px rgba(44, 62, 80, 0.1);
+        }
+        
+        .btn-regenerate:hover {
+            background: var(--color-accent);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
+        }
+        
+        .btn-regenerate:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 4px rgba(44, 62, 80, 0.1);
+        }
+        
+        .btn-regenerate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .ai-status-message {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .ai-status-message.success {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border-left: 3px solid #27ae60;
+        }
+        
+        .ai-status-message.warning {
+            background: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
+            border-left: 3px solid #f39c12;
+        }
+        
+        .ai-status-message.error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border-left: 3px solid #e74c3c;
         }
         
         .techniques-section {
@@ -213,20 +345,20 @@
         }
         
         .explanation-title {
-            font-family: 'Crimson Pro', 'Lora', serif;
-            font-size: 1.6rem;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 1.4rem;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             color: var(--color-accent);
-            padding-bottom: 1rem;
+            padding-bottom: 0.75rem;
             border-bottom: 2px solid var(--color-border);
-            letter-spacing: 0.01em;
+            letter-spacing: -0.01em;
         }
         
         .explanation-content {
-            font-family: 'Lora', 'Crimson Pro', serif;
-            font-size: 1.1rem;
-            line-height: 1.85;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
             color: var(--color-text);
             white-space: pre-line;
             font-weight: 400;
@@ -521,7 +653,7 @@
     <header class="header">
         <div class="container">
             <h1 class="site-title">Les Yeux de Mona</h1>
-            <p class="site-subtitle">Exploration des œuvres citées par Thomas Schlesser</p>
+            <p class="site-subtitle">Exploration d'euvres choisies</p>
         </div>
     </header>
 
@@ -554,11 +686,13 @@
 
     <footer class="footer">
         <div class="container">
-            <p>Collection basée sur le livre "Les Yeux de Mona" de Thomas Schlesser</p>
+            <p>Collection d'oeuvres choisies</p>
         </div>
     </footer>
 
     <script src="js/data.js"></script>
+    <!-- Marked.js pour le rendu Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
     <script>
         // Get artwork ID from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -611,6 +745,11 @@
                         ` : ''}
                         
                         ${artwork.lien ? `<a href="${artwork.lien}" target="_blank" class="oeuvre-link">Voir sur le site du musée →</a>` : ''}
+                        
+                        <button id="ai-info-btn" class="ai-info-btn">
+                            <span>🤖</span>
+                            <span>En savoir plus avec l'IA</span>
+                        </button>
                     </div>
                 </div>
                 
@@ -633,12 +772,23 @@
                         </div>
                     ` : ''}
                     
-                    ${artwork.ce_quil_faut_voir ? `
-                        <div class="explanation-section">
-                            <h3 class="explanation-title">Ce qu'il faut voir</h3>
-                            <div class="explanation-content">${artwork.ce_quil_faut_voir}</div>
+                    <div id="ce-quil-faut-voir-section" class="explanation-section" ${artwork.ce_quil_faut_voir ? '' : 'style="display: none;"'}>
+                        <h3 class="explanation-title">Ce qu'il faut voir</h3>
+                        <div id="ce-quil-faut-voir-content" class="explanation-content">
+                            ${artwork.ce_quil_faut_voir ? artwork.ce_quil_faut_voir : '<p style="color: #999; font-style: italic;">Aucun guide d\'observation disponible.</p>'}
                         </div>
-                    ` : ''}
+                        ${!artwork.ce_quil_faut_voir ? `
+                            <button id="ce-quil-faut-voir-btn" class="ai-info-btn">
+                                <span>🤖</span>
+                                <span>Générer avec l'IA</span>
+                            </button>
+                        ` : ''}
+                    </div>
+                    
+                    <div id="ai-info-section" class="explanation-section" style="display: none;">
+                        <h3 class="explanation-title">Informations complémentaires par l'IA</h3>
+                        <div id="ai-info-content" class="explanation-content"></div>
+                    </div>
                 </div>
                 
                 <div class="navigation-links">
@@ -1389,17 +1539,706 @@
             }
         }
         
+        // ============================================
+        // FONCTIONS UTILITAIRES POUR L'IA
+        // ============================================
+        
+        /**
+         * Crée un bouton de régénération stylé
+         */
+        function createRegenerateButton(onClick, container = null) {
+            const btn = document.createElement('button');
+            btn.className = 'btn-regenerate';
+            btn.innerHTML = '<span>🔄</span><span>Régénérer avec l\'IA</span>';
+            btn.onclick = () => {
+                if (btn.parentNode) {
+                    btn.parentNode.removeChild(btn);
+                }
+                // Retirer les messages de statut existants
+                const statusMsg = btn.parentElement?.querySelector('.ai-status-message');
+                if (statusMsg) {
+                    statusMsg.remove();
+                }
+                // Si un conteneur est fourni, vider son contenu pour afficher la progression
+                if (container) {
+                    container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--color-text-light);"><div style="display: inline-block; width: 40px; height: 40px; border: 3px solid var(--color-border); border-top-color: var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite;"></div><p style="margin-top: 1rem; font-style: italic;">Régénération en cours...</p></div>';
+                }
+                onClick();
+            };
+            return btn;
+        }
+        
+        /**
+         * Affiche un message de statut (succès, warning, erreur)
+         */
+        function showStatusMessage(container, message, type = 'success') {
+            // Retirer les messages existants
+            const existing = container.querySelector('.ai-status-message');
+            if (existing) {
+                existing.remove();
+            }
+            
+            const msg = document.createElement('div');
+            msg.className = `ai-status-message ${type}`;
+            msg.innerHTML = `<span>${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : '❌'}</span><span>${message}</span>`;
+            container.appendChild(msg);
+            
+            // Auto-suppression après 5 secondes pour les messages de succès
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (msg.parentNode) {
+                        msg.remove();
+                    }
+                }, 5000);
+            }
+        }
+        
+        /**
+         * Affiche du contenu Markdown dans un conteneur
+         */
+        function displayMarkdownContent(container, markdownText) {
+            if (typeof marked !== 'undefined') {
+                marked.setOptions({ breaks: false, gfm: true, headerIds: true, mangle: false });
+                container.innerHTML = marked.parse(markdownText);
+            } else {
+                container.innerHTML = markdownText.split('\n').map(line => {
+                    if (line.trim()) {
+                        return `<p style="margin-bottom: 0.25rem; line-height: 1.5;">${line.trim()}</p>`;
+                    }
+                    return '';
+                }).join('');
+            }
+        }
+        
+        /**
+         * Met à jour le bouton principal avec un état donné
+         */
+        function updateMainButton(buttonId, state, text) {
+            const btn = document.getElementById(buttonId);
+            if (!btn) return;
+            
+            btn.disabled = state === 'loading' || state === 'disabled';
+            
+            if (state === 'success') {
+                btn.classList.add('success');
+                btn.innerHTML = `<span>✅</span><span>${text || 'Informations disponibles'}</span>`;
+            } else if (state === 'loading') {
+                btn.classList.remove('success');
+                btn.innerHTML = `<span>⏳</span><span>${text || 'Chargement...'}</span>`;
+            } else {
+                btn.classList.remove('success');
+                btn.innerHTML = `<span>🤖</span><span>${text || 'En savoir plus avec l\'IA'}</span>`;
+            }
+        }
+        
+        /**
+         * Recharge les données depuis le serveur et met à jour l'objet artwork
+         */
+        async function reloadArtworkData(artwork) {
+            try {
+                const dataResponse = await fetch('data/artworks.json?' + Date.now());
+                if (dataResponse.ok) {
+                    const updatedData = await dataResponse.json();
+                    for (const museum in updatedData) {
+                        const updatedArtwork = updatedData[museum].find(a => a.id === artwork.id);
+                        if (updatedArtwork) {
+                            // Mettre à jour toutes les propriétés
+                            Object.assign(artwork, updatedArtwork);
+                            
+                            // Mettre à jour aussi dans allArtworks
+                            const index = allArtworks.findIndex(a => a.id === artwork.id);
+                            if (index !== -1) {
+                                Object.assign(allArtworks[index], updatedArtwork);
+                            }
+                            
+                            // Mettre à jour aussi dans artworksData
+                            artworksData[museum] = updatedData[museum];
+                            break;
+                        }
+                    }
+                    return true;
+                }
+            } catch (error) {
+                console.warn('Erreur lors du rechargement des données:', error);
+            }
+            return false;
+        }
+        
+        // ============================================
+        // FONCTIONS POUR LES INFORMATIONS IA
+        // ============================================
+        
+        // Fonction pour appeler l'API backend pour obtenir les informations IA
+        async function getAIInfo(artwork) {
+            const btn = document.getElementById('ai-info-btn');
+            const content = document.getElementById('ai-info-content');
+            const section = document.getElementById('ai-info-section');
+            
+            // Afficher la section
+            section.style.display = 'block';
+            
+            // Vérifier d'abord si les informations existent déjà dans le JSON
+            if (artwork.informations_ia) {
+                // Afficher les informations existantes
+                section.style.display = 'block';
+                updateMainButton('ai-info-btn', 'success', 'Informations disponibles');
+                displayMarkdownContent(content, artwork.informations_ia);
+                content.appendChild(createRegenerateButton(() => generateNewAIInfo(artwork), content));
+                return;
+            }
+            
+            // Vérifier avec le backend si les informations existent
+            try {
+                const checkResponse = await fetch(`/api/artwork/${artwork.id}/ai-info`);
+                if (checkResponse.ok) {
+                    const checkData = await checkResponse.json();
+                    if (checkData.content && checkData.cached) {
+                        // Informations trouvées dans le JSON
+                        artwork.informations_ia = checkData.content;
+                        section.style.display = 'block';
+                        updateMainButton('ai-info-btn', 'success', 'Informations disponibles');
+                        displayMarkdownContent(content, checkData.content);
+                        content.appendChild(createRegenerateButton(() => generateNewAIInfo(artwork), content));
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.log('Vérification du cache échouée, génération de nouvelles informations...');
+            }
+            
+            // Générer de nouvelles informations
+            generateNewAIInfo(artwork);
+        }
+        
+        // Fonction pour générer de nouvelles informations avec l'IA via le backend
+        async function generateNewAIInfo(artwork) {
+            const btn = document.getElementById('ai-info-btn');
+            const content = document.getElementById('ai-info-content');
+            const section = document.getElementById('ai-info-section');
+            
+            // Afficher la section et mettre le bouton en état de chargement
+            section.style.display = 'block';
+            updateMainButton('ai-info-btn', 'loading', 'Génération en cours...');
+            content.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--color-text-light);"><div style="display: inline-block; width: 40px; height: 40px; border: 3px solid var(--color-border); border-top-color: var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite;"></div><p style="margin-top: 1rem; font-style: italic;">Génération des informations avec l\'IA...</p></div>';
+            
+            try {
+                // Appeler le backend Flask
+                const response = await fetch(`/api/artwork/${artwork.id}/ai-info`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Erreur: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const aiText = data.content;
+                
+                // Utiliser marked.js pour parser le markdown
+                if (typeof marked !== 'undefined') {
+                    // Configuration de marked
+                    marked.setOptions({
+                        breaks: false, // Ne pas convertir les retours à la ligne simples en <br> (Markdown standard)
+                        gfm: true, // GitHub Flavored Markdown
+                        headerIds: true,
+                        mangle: false
+                    });
+                    
+                    // Parser le markdown et afficher le résultat
+                    const htmlContent = marked.parse(aiText);
+                    content.innerHTML = htmlContent;
+                    
+                    // Ajouter des styles pour le markdown si pas déjà ajoutés
+                    if (!document.getElementById('ai-markdown-styles')) {
+                        const style = document.createElement('style');
+                        style.id = 'ai-markdown-styles';
+                        style.textContent = `
+                            #ai-info-content h1, #ai-info-content h2, #ai-info-content h3, #ai-info-content h4, #ai-info-content h5, #ai-info-content h6 {
+                                color: var(--color-accent);
+                                margin-top: 0.75rem;
+                                margin-bottom: 0.25rem;
+                                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                                font-weight: 600;
+                            }
+                            #ai-info-content h1:first-child, #ai-info-content h2:first-child, #ai-info-content h3:first-child {
+                                margin-top: 0;
+                            }
+                            #ai-info-content h1 { font-size: 1.8rem; }
+                            #ai-info-content h2 { font-size: 1.5rem; }
+                            #ai-info-content h3 { font-size: 1.3rem; }
+                            #ai-info-content h4 { font-size: 1.1rem; }
+                            #ai-info-content h5 { font-size: 1rem; }
+                            #ai-info-content h6 { font-size: 0.95rem; }
+                            #ai-info-content p {
+                                margin-bottom: 0.25rem;
+                                line-height: 1.5;
+                            }
+                            #ai-info-content p:last-child {
+                                margin-bottom: 0;
+                            }
+                            #ai-info-content ul, #ai-info-content ol {
+                                margin: 0.25rem 0;
+                                padding-left: 1.5rem;
+                            }
+                            #ai-info-content li {
+                                margin-bottom: 0.125rem;
+                                line-height: 1.4;
+                            }
+                            #ai-info-content li:last-child {
+                                margin-bottom: 0;
+                            }
+                            #ai-info-content strong {
+                                font-weight: 600;
+                                color: var(--color-text);
+                            }
+                            #ai-info-content em {
+                                font-style: italic;
+                            }
+                            #ai-info-content blockquote {
+                                border-left: 4px solid var(--color-accent);
+                                padding-left: 1rem;
+                                margin: 0.5rem 0;
+                                color: var(--color-text-light);
+                                font-style: italic;
+                                background: var(--color-bg);
+                                padding: 0.5rem 0.75rem;
+                                border-radius: 4px;
+                            }
+                            #ai-info-content code {
+                                background: var(--color-bg);
+                                padding: 0.2rem 0.4rem;
+                                border-radius: 3px;
+                                font-family: 'Courier New', monospace;
+                                font-size: 0.9em;
+                                color: var(--color-accent);
+                            }
+                            #ai-info-content pre {
+                                background: var(--color-bg);
+                                padding: 1rem;
+                                border-radius: 4px;
+                                overflow-x: auto;
+                                margin: 1rem 0;
+                                border: 1px solid var(--color-border);
+                            }
+                            #ai-info-content pre code {
+                                background: none;
+                                padding: 0;
+                                color: var(--color-text);
+                            }
+                            #ai-info-content a {
+                                color: var(--color-accent);
+                                text-decoration: underline;
+                            }
+                            #ai-info-content a:hover {
+                                color: var(--color-accent-light);
+                            }
+                            #ai-info-content hr {
+                                border: none;
+                                border-top: 2px solid var(--color-border);
+                                margin: 2rem 0;
+                            }
+                            #ai-info-content table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin: 1rem 0;
+                            }
+                            #ai-info-content table th,
+                            #ai-info-content table td {
+                                padding: 0.5rem;
+                                border: 1px solid var(--color-border);
+                            }
+                            #ai-info-content table th {
+                                background: var(--color-bg);
+                                font-weight: 600;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                } else {
+                    // Fallback si marked n'est pas chargé
+                    content.innerHTML = aiText.split('\n').map(line => {
+                        if (/^\d+\.\s/.test(line.trim())) {
+                            return `<h4 style="margin-top: 0.75rem; margin-bottom: 0.25rem; color: var(--color-accent); font-size: 1.2rem;">${line.trim()}</h4>`;
+                        }
+                        if (line.trim()) {
+                            return `<p style="margin-bottom: 0.25rem; line-height: 1.5;">${line.trim()}</p>`;
+                        }
+                        return '';
+                    }).join('');
+                }
+                
+                // Si sauvegardé, recharger les données depuis le serveur
+                if (data.saved) {
+                    await reloadArtworkData(artwork);
+                    showStatusMessage(content, 'Informations sauvegardées dans le fichier JSON', 'success');
+                } else if (data.warning) {
+                    showStatusMessage(content, data.warning, 'warning');
+                }
+                
+                // Mettre à jour le bouton et ajouter le bouton de régénération
+                updateMainButton('ai-info-btn', 'success', 'Informations disponibles');
+                content.appendChild(createRegenerateButton(() => generateNewAIInfo(artwork)));
+                
+            } catch (error) {
+                console.error('Erreur lors de l\'appel à l\'API backend:', error);
+                content.innerHTML = '';
+                showStatusMessage(content, `Erreur: ${error.message}`, 'error');
+                const helpMsg = document.createElement('p');
+                helpMsg.style.cssText = 'color: var(--color-text-light); font-size: 0.85rem; margin-top: 0.5rem;';
+                helpMsg.textContent = 'Vérifiez que le serveur Flask est démarré et que la clé API est configurée.';
+                content.appendChild(helpMsg);
+                
+                // Réinitialiser le bouton
+                updateMainButton('ai-info-btn', 'default', 'En savoir plus avec l\'IA');
+            }
+        }
+        
+        // Fonction pour afficher automatiquement les informations IA si elles existent
+        function displayAIInfoIfExists(artwork) {
+            if (!artwork) return;
+            
+            const section = document.getElementById('ai-info-section');
+            const content = document.getElementById('ai-info-content');
+            const btn = document.getElementById('ai-info-btn');
+            
+            if (!section || !content || !btn) return;
+            
+            // Vérifier si les informations existent dans l'objet artwork
+            if (artwork.informations_ia) {
+                // Afficher la section
+                section.style.display = 'block';
+                updateMainButton('ai-info-btn', 'success', 'Informations disponibles');
+                displayMarkdownContent(content, artwork.informations_ia);
+                content.appendChild(createRegenerateButton(() => generateNewAIInfo(artwork), content));
+                
+                // Ajouter les styles markdown si nécessaire
+                if (!document.getElementById('ai-markdown-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'ai-markdown-styles';
+                    style.textContent = `
+                        #ai-info-content h1, #ai-info-content h2, #ai-info-content h3, #ai-info-content h4, #ai-info-content h5, #ai-info-content h6,
+                        #ce-quil-faut-voir-content h1, #ce-quil-faut-voir-content h2, #ce-quil-faut-voir-content h3, #ce-quil-faut-voir-content h4, #ce-quil-faut-voir-content h5, #ce-quil-faut-voir-content h6 {
+                            color: var(--color-accent);
+                            margin-top: 0.75rem;
+                            margin-bottom: 0.25rem;
+                            font-family: 'Crimson Pro', 'Lora', serif;
+                            font-weight: 600;
+                        }
+                        #ai-info-content h1:first-child, #ce-quil-faut-voir-content h1:first-child,
+                        #ai-info-content h2:first-child, #ce-quil-faut-voir-content h2:first-child,
+                        #ai-info-content h3:first-child, #ce-quil-faut-voir-content h3:first-child {
+                            margin-top: 0;
+                        }
+                        #ai-info-content h1, #ce-quil-faut-voir-content h1 { font-size: 1.8rem; }
+                        #ai-info-content h2, #ce-quil-faut-voir-content h2 { font-size: 1.5rem; }
+                        #ai-info-content h3, #ce-quil-faut-voir-content h3 { font-size: 1.3rem; }
+                        #ai-info-content h4, #ce-quil-faut-voir-content h4 { font-size: 1.1rem; }
+                        #ai-info-content h5, #ce-quil-faut-voir-content h5 { font-size: 1rem; }
+                        #ai-info-content h6, #ce-quil-faut-voir-content h6 { font-size: 0.95rem; }
+                        #ai-info-content p, #ce-quil-faut-voir-content p {
+                            margin-bottom: 0.25rem;
+                            line-height: 1.5;
+                        }
+                        #ai-info-content p:last-child, #ce-quil-faut-voir-content p:last-child {
+                            margin-bottom: 0;
+                        }
+                        #ai-info-content ul, #ai-info-content ol, #ce-quil-faut-voir-content ul, #ce-quil-faut-voir-content ol {
+                            margin: 0.25rem 0;
+                            padding-left: 1.5rem;
+                        }
+                        #ai-info-content li, #ce-quil-faut-voir-content li {
+                            margin-bottom: 0.125rem;
+                            line-height: 1.4;
+                        }
+                        #ai-info-content li:last-child, #ce-quil-faut-voir-content li:last-child {
+                            margin-bottom: 0;
+                        }
+                        #ai-info-content strong, #ce-quil-faut-voir-content strong {
+                            font-weight: 600;
+                            color: var(--color-text);
+                        }
+                        #ai-info-content em, #ce-quil-faut-voir-content em {
+                            font-style: italic;
+                        }
+                        #ai-info-content blockquote, #ce-quil-faut-voir-content blockquote {
+                            border-left: 4px solid var(--color-accent);
+                            padding-left: 1rem;
+                            margin: 0.5rem 0;
+                            color: var(--color-text-light);
+                            font-style: italic;
+                            background: var(--color-bg);
+                            padding: 0.5rem 0.75rem;
+                            border-radius: 4px;
+                        }
+                        #ai-info-content code, #ce-quil-faut-voir-content code {
+                            background: var(--color-bg);
+                            padding: 0.2rem 0.4rem;
+                            border-radius: 3px;
+                            font-family: 'Courier New', monospace;
+                            font-size: 0.9em;
+                            color: var(--color-accent);
+                        }
+                        #ai-info-content pre, #ce-quil-faut-voir-content pre {
+                            background: var(--color-bg);
+                            padding: 1rem;
+                            border-radius: 4px;
+                            overflow-x: auto;
+                            margin: 1rem 0;
+                            border: 1px solid var(--color-border);
+                        }
+                        #ai-info-content pre code, #ce-quil-faut-voir-content pre code {
+                            background: none;
+                            padding: 0;
+                            color: var(--color-text);
+                        }
+                        #ai-info-content a, #ce-quil-faut-voir-content a {
+                            color: var(--color-accent);
+                            text-decoration: underline;
+                        }
+                        #ai-info-content a:hover, #ce-quil-faut-voir-content a:hover {
+                            color: var(--color-accent-light);
+                        }
+                        #ai-info-content hr, #ce-quil-faut-voir-content hr {
+                            border: none;
+                            border-top: 2px solid var(--color-border);
+                            margin: 2rem 0;
+                        }
+                        #ai-info-content table, #ce-quil-faut-voir-content table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 1rem 0;
+                        }
+                        #ai-info-content table th, #ai-info-content table td,
+                        #ce-quil-faut-voir-content table th, #ce-quil-faut-voir-content table td {
+                            padding: 0.5rem;
+                            border: 1px solid var(--color-border);
+                        }
+                        #ai-info-content table th, #ce-quil-faut-voir-content table th {
+                            background: var(--color-bg);
+                            font-weight: 600;
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Mettre à jour le bouton
+                btn.disabled = false;
+                btn.innerHTML = '<span>✅</span><span>Informations disponibles</span>';
+                
+                // Ajouter un bouton pour régénérer
+                const regenerateBtn = document.createElement('button');
+                regenerateBtn.textContent = '🔄 Régénérer avec l\'IA';
+                regenerateBtn.style.cssText = 'margin-top: 1rem; padding: 0.5rem 1rem; background: var(--color-accent); color: white; border: none; border-radius: 4px; cursor: pointer;';
+                regenerateBtn.onclick = () => {
+                    if (regenerateBtn.parentNode) {
+                        regenerateBtn.parentNode.removeChild(regenerateBtn);
+                    }
+                    generateNewAIInfo(artwork);
+                };
+                content.appendChild(regenerateBtn);
+            } else {
+                // Vérifier avec le backend si les informations existent
+                fetch(`/api/artwork/${artwork.id}/ai-info`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        return null;
+                    })
+                    .then(data => {
+                        if (data && data.content && data.cached) {
+                            // Informations trouvées dans le JSON
+                            artwork.informations_ia = data.content;
+                            displayAIInfoIfExists(artwork);
+                        }
+                    })
+                    .catch(err => {
+                        // Ignorer les erreurs silencieusement
+                        console.log('Vérification des informations IA:', err);
+                    });
+            }
+        }
+        
+        // Fonction pour afficher "Ce qu'il faut voir" avec parsing Markdown
+        function displayCeQuilFautVoir(artwork) {
+            if (!artwork) return;
+            
+            const section = document.getElementById('ce-quil-faut-voir-section');
+            const content = document.getElementById('ce-quil-faut-voir-content');
+            
+            if (!section || !content) return;
+            
+            // Vérifier si le contenu existe dans l'objet artwork
+            if (artwork.ce_quil_faut_voir) {
+                // Afficher la section
+                section.style.display = 'block';
+                displayMarkdownContent(content, artwork.ce_quil_faut_voir);
+                content.appendChild(createRegenerateButton(() => generateCeQuilFautVoir(artwork), content));
+            } else {
+                // Vérifier avec le backend si les informations existent
+                fetch(`/api/artwork/${artwork.id}/ce-quil-faut-voir`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        return null;
+                    })
+                    .then(data => {
+                        if (data && data.content && data.cached) {
+                            // Informations trouvées dans le JSON
+                            artwork.ce_quil_faut_voir = data.content;
+                            displayCeQuilFautVoir(artwork);
+                        }
+                    })
+                    .catch(err => {
+                        // Ignorer les erreurs silencieusement
+                        console.log('Vérification de "Ce qu\'il faut voir":', err);
+                    });
+            }
+        }
+        
+        // Fonction pour générer "Ce qu'il faut voir" avec l'IA
+        async function generateCeQuilFautVoir(artwork) {
+            const btn = document.getElementById('ce-quil-faut-voir-btn');
+            const content = document.getElementById('ce-quil-faut-voir-content');
+            const section = document.getElementById('ce-quil-faut-voir-section');
+            
+            if (!content || !section) return;
+            
+            // Afficher la section et mettre le bouton en état de chargement
+            section.style.display = 'block';
+            
+            // Mettre à jour le bouton principal s'il existe
+            if (btn && btn.parentNode) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>⏳</span><span>Génération...</span>';
+            }
+            
+            // Afficher l'indicateur de progression
+            content.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--color-text-light);"><div style="display: inline-block; width: 40px; height: 40px; border: 3px solid var(--color-border); border-top-color: var(--color-accent); border-radius: 50%; animation: spin 1s linear infinite;"></div><p style="margin-top: 1rem; font-style: italic;">Génération du guide d\'observation avec l\'IA...</p></div>';
+            
+            try {
+                // Appeler le backend Flask
+                const response = await fetch(`/api/artwork/${artwork.id}/ce-quil-faut-voir`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `Erreur: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                const aiText = data.content;
+                
+                // Mettre à jour l'objet artwork localement
+                artwork.ce_quil_faut_voir = aiText;
+                
+                // Recharger les données depuis le serveur si sauvegardé
+                if (data.saved) {
+                    await reloadArtworkData(artwork);
+                    // Mettre à jour l'objet artwork avec les données rechargées
+                    const updatedArtwork = allArtworks.find(a => a.id === artwork.id);
+                    if (updatedArtwork && updatedArtwork.ce_quil_faut_voir) {
+                        artwork.ce_quil_faut_voir = updatedArtwork.ce_quil_faut_voir;
+                    }
+                }
+                
+                // Afficher le contenu avec parsing Markdown
+                displayMarkdownContent(content, artwork.ce_quil_faut_voir);
+                
+                // Afficher le message de statut
+                if (data.saved) {
+                    showStatusMessage(content, 'Guide sauvegardé dans le fichier JSON', 'success');
+                } else if (data.warning) {
+                    showStatusMessage(content, data.warning, 'warning');
+                }
+                
+                // Retirer le bouton de génération puisqu'on a maintenant le contenu
+                if (btn && btn.parentNode) {
+                    btn.parentNode.removeChild(btn);
+                }
+                
+                // Ajouter un bouton pour régénérer (en passant le conteneur pour vider le contenu)
+                content.appendChild(createRegenerateButton(() => generateCeQuilFautVoir(artwork), content));
+                
+            } catch (error) {
+                console.error('Erreur lors de l\'appel à l\'API backend:', error);
+                content.innerHTML = '';
+                showStatusMessage(content, `Erreur: ${error.message}`, 'error');
+                const helpMsg = document.createElement('p');
+                helpMsg.style.cssText = 'color: var(--color-text-light); font-size: 0.85rem; margin-top: 0.5rem;';
+                helpMsg.textContent = 'Vérifiez que le serveur Flask est démarré et que la clé API est configurée.';
+                content.appendChild(helpMsg);
+                
+                // Réinitialiser le bouton
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>🤖</span><span>Générer avec l\'IA</span>';
+                }
+            }
+        }
+        
+        // Fonction pour configurer le bouton AI
+        function setupAIButton() {
+            const btn = document.getElementById('ai-info-btn');
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    const artwork = allArtworks.find(a => a.id === artworkId);
+                    if (artwork) {
+                        getAIInfo(artwork);
+                    }
+                });
+            }
+            
+            // Configurer le bouton pour "Ce qu'il faut voir"
+            const ceQuilFautVoirBtn = document.getElementById('ce-quil-faut-voir-btn');
+            if (ceQuilFautVoirBtn) {
+                ceQuilFautVoirBtn.addEventListener('click', () => {
+                    const artwork = allArtworks.find(a => a.id === artworkId);
+                    if (artwork) {
+                        generateCeQuilFautVoir(artwork);
+                    }
+                });
+            }
+        }
+        
         // Wait for data to load
         window.addEventListener('artworksDataLoaded', () => {
             renderArtworkPage();
             // Setup fullscreen handler after rendering
             setTimeout(setupFullscreenHandler, 50);
+            // Setup AI button after rendering
+            setTimeout(setupAIButton, 50);
+            // Afficher les informations IA si elles existent
+            setTimeout(() => {
+                const artwork = allArtworks.find(a => a.id === artworkId);
+                if (artwork) {
+                    displayAIInfoIfExists(artwork);
+                    displayCeQuilFautVoir(artwork);
+                }
+            }, 100);
         });
         
         // If data is already loaded (race condition)
         if (allArtworks.length > 0) {
             renderArtworkPage();
             setTimeout(setupFullscreenHandler, 50);
+            setTimeout(setupAIButton, 50);
+            setTimeout(() => {
+                const artwork = allArtworks.find(a => a.id === artworkId);
+                if (artwork) {
+                    displayAIInfoIfExists(artwork);
+                    displayCeQuilFautVoir(artwork);
+                }
+            }, 100);
         }
     </script>
 </body>
