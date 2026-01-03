@@ -243,7 +243,7 @@
 - **Nom du fichier** : `Approaching_Thunder_Storm.jpg`
 - **Recherche** : "Martin Johnson Heade Approaching Thunder Storm"
 
-### 56. Sunrise on the Marshes - Martin Johnson Heade (1863)
+### 56. Sunset Over the Marshes - Martin Johnson Heade (1863)
 - **Nom du fichier** : `Sunrise_on_the_Marshes.jpg`
 - **Recherche** : "Martin Johnson Heade Sunrise on the Marshes"
 

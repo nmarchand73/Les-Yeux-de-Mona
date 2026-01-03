@@ -1914,16 +1914,16 @@
     },
     {
       "id": "hudson_river_48",
-      "titre": "Autumn in the Catskills",
+      "titre": "October in the Catskills",
       "artiste": "Sanford R. Gifford",
-      "date": "1861",
+      "date": "1880",
       "lien": "https://commons.wikimedia.org/wiki/File:Sanford_Robinson_Gifford_-_Autumn_in_the_Catskills.jpg",
       "image_hd_url": "https://commons.wikimedia.org/wiki/File:Sanford_Robinson_Gifford_-_Autumn_in_the_Catskills.jpg",
       "image_hd_local": "images/hudson_river/Autumn_in_the_Catskills.jpg",
       "musee": "Hudson River School",
       "dimensions": {
-        "hauteur": 85,
-        "largeur": 125,
+        "hauteur": 128,
+        "largeur": 109,
         "unite": "cm"
       },
       "techniques": ["Huile sur toile", "Paysage luministe", "Composition horizontale", "Luminisme", "Palette de couleurs automnales", "Perspective atmosphérique", "Style minimaliste"],
@@ -1960,8 +1960,8 @@
       "image_hd_local": "images/hudson_river/The_Spirit_of_Peace.jpg",
       "musee": "Hudson River School",
       "dimensions": {
-        "hauteur": 90,
-        "largeur": 140,
+        "hauteur": 152,
+        "largeur": 203,
         "unite": "cm"
       },
       "techniques": ["Huile sur toile", "Paysage romantique", "Luminisme", "Composition panoramique", "Palette de couleurs harmonieuses", "Détails naturalistes", "Rendu de la végétation", "Perspective atmosphérique"],
@@ -2047,7 +2047,7 @@
     },
     {
       "id": "hudson_river_55",
-      "titre": "Sunrise on the Marshes",
+      "titre": "Sunset Over the Marshes",
       "artiste": "Martin Johnson Heade",
       "date": "1863",
       "lien": "https://commons.wikimedia.org/wiki/File:Martin_Johnson_Heade_-_Sunrise_on_the_Marshes.jpg",
@@ -2055,13 +2055,13 @@
       "image_hd_local": "images/hudson_river/Sunrise_on_the_Marshes.jpg",
       "musee": "Hudson River School",
       "dimensions": {
-        "hauteur": 65,
-        "largeur": 100,
+        "hauteur": 26,
+        "largeur": 46,
         "unite": "cm"
       },
-      "techniques": ["Huile sur toile", "Paysage luministe", "Composition horizontale", "Luminisme", "Palette de couleurs chaudes", "Rendu de la lumière du lever de soleil", "Perspective atmosphérique", "Style minimaliste"],
-      "comment_comprendre": "Sunrise on the Marshes, peint en 1863 par Martin Johnson Heade, représente un paysage de marais au lever du soleil, illustrant la maîtrise de l'artiste dans le rendu de la lumière atmosphérique. Cette œuvre caractérise une approche plus contemplative et minimaliste du paysage.\n\nHeade privilégie ici la lumière et l'atmosphère sur les détails narratifs. La composition, avec son horizon bas et son ciel vaste, crée une sensation de calme et de sérénité. Le traitement de la lumière du lever de soleil, avec ses couleurs chaudes et ses transitions graduelles, crée une atmosphère poétique.\n\nL'œuvre témoigne de la maîtrise technique de Heade dans le rendu de la lumière et de l'atmosphère. Le traitement subtil de la lumière, particulièrement dans les nuages et sur les marais, crée une harmonie visuelle qui caractérise le luminisme. Cette peinture illustre aussi l'évolution du mouvement vers une approche plus contemplative et méditative du paysage.",
-      "ce_quil_faut_voir": "Observez la lumière du lever de soleil : le traitement de la lumière, avec ses couleurs chaudes et ses transitions graduelles, crée une atmosphère poétique. Cette maîtrise de la lumière caractérise le style de Heade.\n\nPortez attention à la composition : l'horizon bas et le ciel vaste créent une sensation de calme et de sérénité. Les marais au premier plan créent un point d'ancrage visuel.\n\nExaminez la palette de couleurs : les tons chauds du lever de soleil créent une harmonie visuelle qui caractérise le luminisme.\n\nRemarquez l'atmosphère : la représentation de l'air et de la lumière atmosphérique crée une sensation de profondeur et de réalisme.",
+      "techniques": ["Huile sur toile", "Paysage luministe", "Composition horizontale", "Luminisme", "Palette de couleurs chaudes et dorées", "Rendu de la lumière du coucher de soleil", "Perspective atmosphérique", "Style minimaliste", "Traitement subtil de la lumière crépusculaire"],
+      "comment_comprendre": "Sunset Over the Marshes, peint en 1863 par Martin Johnson Heade, représente un paysage de marais au coucher du soleil, illustrant la maîtrise exceptionnelle de l'artiste dans le rendu de la lumière atmosphérique crépusculaire. Cette œuvre caractérise une approche contemplative et minimaliste du paysage, typique du luminisme.\n\nHeade privilégie ici la lumière et l'atmosphère sur les détails narratifs. La composition, avec son horizon bas et son ciel vaste, crée une sensation de calme et de sérénité. Le traitement de la lumière du coucher de soleil, avec ses couleurs chaudes, dorées et orangées, et ses transitions graduelles vers les tons plus sombres, crée une atmosphère poétique et mélancolique.\n\nL'œuvre témoigne de la maîtrise technique de Heade dans le rendu de la lumière crépusculaire et de l'atmosphère. Le traitement subtil de la lumière, particulièrement dans les nuages et sur les marais, crée une harmonie visuelle qui caractérise le luminisme. Les reflets de la lumière du coucher de soleil sur les eaux des marais ajoutent une dimension supplémentaire à cette œuvre contemplative.\n\nCette peinture illustre l'évolution du mouvement Hudson River School vers une approche plus méditative et poétique du paysage, où la lumière devient le sujet principal de l'œuvre.",
+      "ce_quil_faut_voir": "Observez la lumière du coucher de soleil : le traitement de la lumière crépusculaire, avec ses couleurs chaudes, dorées et orangées, et ses transitions graduelles vers les tons plus sombres, crée une atmosphère poétique. Cette maîtrise de la lumière caractérise le style luministe de Heade.\n\nPortez attention à la composition : l'horizon bas et le ciel vaste créent une sensation de calme et de sérénité. Les marais au premier plan créent un point d'ancrage visuel et reflètent la lumière du coucher de soleil.\n\nExaminez la palette de couleurs : les tons chauds du coucher de soleil, du doré à l'orangé, créent une harmonie visuelle qui caractérise le luminisme. La transition vers les tons plus sombres du ciel ajoute de la profondeur.\n\nRemarquez les reflets : la lumière du coucher de soleil se reflète sur les eaux des marais, créant des effets de lumière subtils et poétiques.\n\nObservez l'atmosphère : la représentation de l'air et de la lumière atmosphérique crépusculaire crée une sensation de profondeur et de réalisme, caractéristique du luminisme.",
       "bibliographie": ["Martin Johnson Heade by Theodore E. Stebbins Jr.", "The Hudson River School: Nature and the American Vision by Linda S. Ferber", "Martin Johnson Heade: A Survey by Theodore E. Stebbins Jr.", "American Luminism by John Wilmerding"]
     }
   ]

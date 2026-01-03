@@ -463,6 +463,7 @@ function createGalleryFloor() {
 }
 
 // Fonction pour créer une texture de mur avec relief et nuances
+// Fonction pour créer une texture de mur typique de musée (blanc cassé/ivoire avec texture de plâtre)
 function createWallTexture() {
     const size = 1024;
     const canvas = document.createElement('canvas');
@@ -470,44 +471,53 @@ function createWallTexture() {
     canvas.height = size;
     const context = canvas.getContext('2d');
     
-    // Base blanche
-    context.fillStyle = '#ffffff';
+    // Couleur de base : blanc cassé/ivoire typique des musées (#F7F5F0)
+    // Cette couleur est plus chaude que le blanc pur, caractéristique des murs de musée
+    const baseColor = { r: 247, g: 245, b: 240 }; // #F7F5F0 - blanc musée classique
+    
+    // Remplir avec la couleur de base
+    context.fillStyle = `rgb(${baseColor.r}, ${baseColor.g}, ${baseColor.b})`;
     context.fillRect(0, 0, size, size);
     
-    // Ajouter des variations plus visibles de couleur (nuances de blanc/gris clair)
+    // Ajouter des variations subtiles de couleur pour simuler le plâtre
     const imageData = context.getImageData(0, 0, size, size);
     const data = imageData.data;
     
-    // Créer un bruit de Perlin simplifié pour des variations plus naturelles
+    // Créer un bruit de Perlin simplifié pour des variations naturelles de plâtre
     for (let i = 0; i < data.length; i += 4) {
         const x = (i / 4) % size;
         const y = Math.floor((i / 4) / size);
         
-        // Créer des variations avec un pattern plus visible
-        const noise1 = Math.sin(x * 0.01) * Math.cos(y * 0.01) * 5;
-        const noise2 = (Math.random() - 0.5) * 12;
-        const noise = noise1 + noise2;
-        const baseColor = 250;
-        const color = Math.max(235, Math.min(255, baseColor + noise));
+        // Variations subtiles avec plusieurs fréquences pour un effet de plâtre réaliste
+        const noise1 = Math.sin(x * 0.015) * Math.cos(y * 0.015) * 3;
+        const noise2 = Math.sin(x * 0.05) * Math.cos(y * 0.05) * 1.5;
+        const noise3 = (Math.random() - 0.5) * 8; // Grain aléatoire subtil
         
-        data[i] = color;     // R
-        data[i + 1] = color; // G
-        data[i + 2] = color; // B
-        data[i + 3] = 255;   // A
+        const noise = noise1 + noise2 + noise3;
+        
+        // Appliquer les variations tout en restant dans la gamme blanc cassé
+        const r = Math.max(240, Math.min(252, baseColor.r + noise));
+        const g = Math.max(240, Math.min(252, baseColor.g + noise * 0.8));
+        const b = Math.max(235, Math.min(248, baseColor.b + noise * 0.6));
+        
+        data[i] = r;     // R
+        data[i + 1] = g; // G
+        data[i + 2] = b; // B
+        data[i + 3] = 255; // A
     }
     
     context.putImageData(imageData, 0, 0);
     
-    // Ajouter des motifs plus visibles pour simuler le relief et les imperfections
-    context.globalAlpha = 0.08;
-    for (let i = 0; i < 100; i++) {
+    // Ajouter des imperfections subtiles de plâtre (petites variations de relief)
+    context.globalAlpha = 0.06;
+    for (let i = 0; i < 150; i++) {
         const x = Math.random() * size;
         const y = Math.random() * size;
-        const radius = 30 + Math.random() * 50;
+        const radius = 20 + Math.random() * 40;
         
         const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.15)');
-        gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.05)');
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.12)');
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.04)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         
         context.fillStyle = gradient;
@@ -516,15 +526,36 @@ function createWallTexture() {
         context.fill();
     }
     
-    // Ajouter des lignes subtiles pour simuler les joints de plâtre
-    context.globalAlpha = 0.05;
-    context.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-    context.lineWidth = 1;
-    for (let y = 0; y < size; y += 200) {
+    // Ajouter des lignes très subtiles pour simuler les joints de plâtre (verticales et horizontales)
+    context.globalAlpha = 0.03;
+    context.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+    context.lineWidth = 0.5;
+    
+    // Lignes horizontales (joints de plâtre horizontaux)
+    for (let y = 0; y < size; y += 180) {
         context.beginPath();
         context.moveTo(0, y);
         context.lineTo(size, y);
         context.stroke();
+    }
+    
+    // Lignes verticales (joints de plâtre verticaux)
+    for (let x = 0; x < size; x += 180) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x, size);
+        context.stroke();
+    }
+    
+    // Ajouter un léger grain de texture (simulation de la texture de plâtre)
+    context.globalAlpha = 0.04;
+    for (let i = 0; i < 3000; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const brightness = Math.random() * 0.3 - 0.15; // Variations très subtiles
+        
+        context.fillStyle = `rgba(${Math.floor(128 + brightness * 127)}, ${Math.floor(128 + brightness * 127)}, ${Math.floor(128 + brightness * 127)}, 0.3)`;
+        context.fillRect(x, y, 1, 1);
     }
     
     context.globalAlpha = 1.0;
@@ -533,6 +564,8 @@ function createWallTexture() {
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     texture.repeat.set(3, 3); // Répéter la texture sur les murs
+    texture.generateMipmaps = false; // Désactiver les mipmaps pour éviter l'avertissement WebGL
+    texture.minFilter = THREE.LinearFilter; // Utiliser LinearFilter au lieu de LinearMipmapLinearFilter
     texture.needsUpdate = true;
     
     return texture;
@@ -629,10 +662,11 @@ function createGalleryWalls() {
     // Pas de normalMap ni roughnessMap pour économiser les uniformes WebGL
     
     // Matériau simplifié pour réduire les uniformes WebGL (seulement map, pas de normalMap)
+    // Couleur blanc cassé/ivoire typique des musées (#F7F5F0)
     const wallMaterial = new THREE.MeshStandardMaterial({
         map: wallTexture,
-        color: 0xffffff, // Blanc pur pour les murs de galerie
-        roughness: 0.75,
+        color: 0xf7f5f0, // Blanc cassé/ivoire typique des murs de musée (plus chaud que le blanc pur)
+        roughness: 0.8, // Surface légèrement plus matte pour un rendu de plâtre
         metalness: 0.0,
         flatShading: false
         // Pas de normalMap, roughnessMap ni envMap pour économiser les uniformes
@@ -2014,6 +2048,14 @@ function toggleHelpers(enabled) {
     });
 }
 
+// Fonction pour basculer l'affichage des overlays
+function toggleOverlays() {
+    const container = document.getElementById('canvas-container');
+    if (container) {
+        container.classList.toggle('overlays-hidden');
+    }
+}
+
 // Fonction pour configurer les event listeners
 function setupEventListeners() {
     // Fermeture
@@ -2021,9 +2063,17 @@ function setupEventListeners() {
         window.close();
     });
     
+    // Toggle overlays
+    const toggleOverlaysBtn = document.getElementById('toggle-overlays');
+    if (toggleOverlaysBtn) {
+        toggleOverlaysBtn.addEventListener('click', toggleOverlays);
+    }
+    
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             window.close();
+        } else if (e.key === 'h' || e.key === 'H') {
+            toggleOverlays();
         } else if (e.key === 'ArrowLeft') {
             navigateToPainting(currentPaintingIndex - 1);
         } else if (e.key === 'ArrowRight') {

@@ -556,7 +556,7 @@ function setupLights(configName = 'gallery-spots') {
             const targetZ = paintingZ;
             
             // Intensité de base multipliée par 4.0 pour une puissance accrue des spots
-            const baseIntensity = (spotsConfig.defaultIntensity || 1.0) * 4.0;
+            const baseIntensity = (spotsConfig.defaultIntensity || 1.0) * 5.5; // Intensité augmentée pour des couleurs plus vives
             
             const spot = new THREE.SpotLight(
                 spotsConfig.colorTemperature,
@@ -1246,7 +1246,7 @@ function createGalleryFloor() {
     return floor;
 }
 
-// Fonction pour créer une texture de mur avec relief et nuances
+// Fonction pour créer une texture de mur typique de musée (blanc cassé/ivoire avec texture de plâtre)
 function createWallTexture() {
     const size = 1024;
     const canvas = document.createElement('canvas');
@@ -1254,44 +1254,53 @@ function createWallTexture() {
     canvas.height = size;
     const context = canvas.getContext('2d');
     
-    // Base blanche
-    context.fillStyle = '#ffffff';
+    // Couleur de base : blanc cassé/ivoire typique des musées (#F7F5F0)
+    // Cette couleur est plus chaude que le blanc pur, caractéristique des murs de musée
+    const baseColor = { r: 247, g: 245, b: 240 }; // #F7F5F0 - blanc musée classique
+    
+    // Remplir avec la couleur de base
+    context.fillStyle = `rgb(${baseColor.r}, ${baseColor.g}, ${baseColor.b})`;
     context.fillRect(0, 0, size, size);
     
-    // Ajouter des variations plus visibles de couleur (nuances de blanc/gris clair)
+    // Ajouter des variations subtiles de couleur pour simuler le plâtre
     const imageData = context.getImageData(0, 0, size, size);
     const data = imageData.data;
     
-    // Créer un bruit de Perlin simplifié pour des variations plus naturelles
+    // Créer un bruit de Perlin simplifié pour des variations naturelles de plâtre
     for (let i = 0; i < data.length; i += 4) {
         const x = (i / 4) % size;
         const y = Math.floor((i / 4) / size);
         
-        // Créer des variations avec un pattern plus visible
-        const noise1 = Math.sin(x * 0.01) * Math.cos(y * 0.01) * 5;
-        const noise2 = (Math.random() - 0.5) * 12;
-        const noise = noise1 + noise2;
-        const baseColor = 250;
-        const color = Math.max(235, Math.min(255, baseColor + noise));
+        // Variations subtiles avec plusieurs fréquences pour un effet de plâtre réaliste
+        const noise1 = Math.sin(x * 0.015) * Math.cos(y * 0.015) * 3;
+        const noise2 = Math.sin(x * 0.05) * Math.cos(y * 0.05) * 1.5;
+        const noise3 = (Math.random() - 0.5) * 8; // Grain aléatoire subtil
         
-        data[i] = color;     // R
-        data[i + 1] = color; // G
-        data[i + 2] = color; // B
-        data[i + 3] = 255;   // A
+        const noise = noise1 + noise2 + noise3;
+        
+        // Appliquer les variations tout en restant dans la gamme blanc cassé
+        const r = Math.max(240, Math.min(252, baseColor.r + noise));
+        const g = Math.max(240, Math.min(252, baseColor.g + noise * 0.8));
+        const b = Math.max(235, Math.min(248, baseColor.b + noise * 0.6));
+        
+        data[i] = r;     // R
+        data[i + 1] = g; // G
+        data[i + 2] = b; // B
+        data[i + 3] = 255; // A
     }
     
     context.putImageData(imageData, 0, 0);
     
-    // Ajouter des motifs plus visibles pour simuler le relief et les imperfections
-    context.globalAlpha = 0.08;
-    for (let i = 0; i < 100; i++) {
+    // Ajouter des imperfections subtiles de plâtre (petites variations de relief)
+    context.globalAlpha = 0.06;
+    for (let i = 0; i < 150; i++) {
         const x = Math.random() * size;
         const y = Math.random() * size;
-        const radius = 30 + Math.random() * 50;
+        const radius = 20 + Math.random() * 40;
         
         const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
-        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.15)');
-        gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.05)');
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.12)');
+        gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.04)');
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         
         context.fillStyle = gradient;
@@ -1300,15 +1309,36 @@ function createWallTexture() {
         context.fill();
     }
     
-    // Ajouter des lignes subtiles pour simuler les joints de plâtre
-    context.globalAlpha = 0.05;
-    context.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-    context.lineWidth = 1;
-    for (let y = 0; y < size; y += 200) {
+    // Ajouter des lignes très subtiles pour simuler les joints de plâtre (verticales et horizontales)
+    context.globalAlpha = 0.03;
+    context.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+    context.lineWidth = 0.5;
+    
+    // Lignes horizontales (joints de plâtre horizontaux)
+    for (let y = 0; y < size; y += 180) {
         context.beginPath();
         context.moveTo(0, y);
         context.lineTo(size, y);
         context.stroke();
+    }
+    
+    // Lignes verticales (joints de plâtre verticaux)
+    for (let x = 0; x < size; x += 180) {
+        context.beginPath();
+        context.moveTo(x, 0);
+        context.lineTo(x, size);
+        context.stroke();
+    }
+    
+    // Ajouter un léger grain de texture (simulation de la texture de plâtre)
+    context.globalAlpha = 0.04;
+    for (let i = 0; i < 3000; i++) {
+        const x = Math.random() * size;
+        const y = Math.random() * size;
+        const brightness = Math.random() * 0.3 - 0.15; // Variations très subtiles
+        
+        context.fillStyle = `rgba(${Math.floor(128 + brightness * 127)}, ${Math.floor(128 + brightness * 127)}, ${Math.floor(128 + brightness * 127)}, 0.3)`;
+        context.fillRect(x, y, 1, 1);
     }
     
     context.globalAlpha = 1.0;
@@ -1420,12 +1450,13 @@ function createGalleryWalls() {
     const wallRoughnessMap = createWallRoughnessMap();
     
     // Matériau simplifié pour réduire les uniformes WebGL (retrait de roughnessMap et envMap)
+    // Couleur blanc cassé/ivoire typique des musées (#F7F5F0)
     const wallMaterial = new THREE.MeshStandardMaterial({
         map: wallTexture,
         normalMap: wallNormalMap,
         normalScale: new THREE.Vector2(0.8, 0.8), // Relief plus visible pour mieux voir les textures
-        color: 0xffffff, // Blanc pur pour les murs de galerie
-        roughness: 0.75,
+        color: 0xf7f5f0, // Blanc cassé/ivoire typique des murs de musée (plus chaud que le blanc pur)
+        roughness: 0.8, // Surface légèrement plus matte pour un rendu de plâtre
         metalness: 0.0,
         flatShading: false
         // Pas de roughnessMap ni envMap pour économiser les uniformes
@@ -1854,10 +1885,108 @@ function loadPainting(imageSrc, realHeight = null, realWidth = null) {
                 
                 // COUCHE 3 : La peinture avec vernis intégré (clearcoat au lieu d'une couche séparée)
                 // Cette méthode évite le blanchissement causé par les couches transparentes superposées
+                // Augmentation de la saturation des couleurs pour des peintures plus vives et éclatantes
+                
+                // Créer une texture avec saturation augmentée via canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = texture.image.width;
+                canvas.height = texture.image.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(texture.image, 0, 0);
+                
+                // Augmenter la saturation via canvas en préservant les teintes originales (conversion HSL)
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                
+                // Boost de saturation : 30% pour des couleurs plus vives tout en préservant les teintes
+                const saturationBoost = 0.3;
+                
+                // Fonction pour convertir RGB en HSL
+                function rgbToHsl(r, g, b) {
+                    r /= 255;
+                    g /= 255;
+                    b /= 255;
+                    
+                    const max = Math.max(r, g, b);
+                    const min = Math.min(r, g, b);
+                    let h, s, l = (max + min) / 2;
+                    
+                    if (max === min) {
+                        h = s = 0; // achromatique
+                    } else {
+                        const d = max - min;
+                        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                        
+                        switch (max) {
+                            case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                            case g: h = ((b - r) / d + 2) / 6; break;
+                            case b: h = ((r - g) / d + 4) / 6; break;
+                        }
+                    }
+                    
+                    return [h, s, l];
+                }
+                
+                // Fonction pour convertir HSL en RGB
+                function hslToRgb(h, s, l) {
+                    let r, g, b;
+                    
+                    if (s === 0) {
+                        r = g = b = l; // achromatique
+                    } else {
+                        const hue2rgb = (p, q, t) => {
+                            if (t < 0) t += 1;
+                            if (t > 1) t -= 1;
+                            if (t < 1/6) return p + (q - p) * 6 * t;
+                            if (t < 1/2) return q;
+                            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                            return p;
+                        };
+                        
+                        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                        const p = 2 * l - q;
+                        r = hue2rgb(p, q, h + 1/3);
+                        g = hue2rgb(p, q, h);
+                        b = hue2rgb(p, q, h - 1/3);
+                    }
+                    
+                    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+                }
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    // Convertir RGB en HSL pour préserver la teinte
+                    const [h, s, l] = rgbToHsl(r, g, b);
+                    
+                    // Augmenter uniquement la saturation, sans toucher à la teinte (h) ni à la luminosité (l)
+                    const newS = Math.min(1.0, s * (1.0 + saturationBoost));
+                    
+                    // Reconvertir HSL en RGB avec la saturation augmentée
+                    const [newR, newG, newB] = hslToRgb(h, newS, l);
+                    
+                    data[i] = newR;
+                    data[i + 1] = newG;
+                    data[i + 2] = newB;
+                    // data[i + 3] reste inchangé (alpha)
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                
+                // Créer une nouvelle texture avec saturation augmentée
+                const saturatedTexture = new THREE.CanvasTexture(canvas);
+                saturatedTexture.colorSpace = THREE.SRGBColorSpace;
+                saturatedTexture.generateMipmaps = false;
+                saturatedTexture.minFilter = THREE.LinearFilter;
+                saturatedTexture.magFilter = THREE.LinearFilter;
+                
+                // Utiliser MeshPhysicalMaterial avec la texture saturée
                 const paintMaterial = new THREE.MeshPhysicalMaterial({
-                    map: texture, // Texture de l'image du tableau
+                    map: saturatedTexture, // Texture avec saturation augmentée pour des couleurs plus vives
                     side: THREE.FrontSide,
-                    roughness: 0.5, // Rugosité de la peinture sous le vernis (légèrement plus matte)
+                    roughness: 0.25, // Rugosité très réduite pour des couleurs très vives et éclatantes
                     metalness: 0.0,
                     normalMap: canvasNormalMap,
                     normalScale: new THREE.Vector2(0.5, 0.5), // Relief plus visible pour montrer la texture de la toile
@@ -2014,9 +2143,9 @@ function init() {
         renderer.shadowMap.autoUpdate = true;
         renderer.shadowMap.needsUpdate = true;
         
-        // Tone mapping ACES Filmic pour rendu cinématique réaliste
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2; // Exposition réduite pour préserver les textures des murs
+        // Tone mapping Reinhard pour des couleurs plus saturées et éclatantes
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        renderer.toneMappingExposure = 2.2; // Exposition très augmentée pour des couleurs vives et éclatantes
         
         // Color space et encoding pour meilleure précision des couleurs
         renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -2583,9 +2712,9 @@ function toggleSpotOnlyMode(enabled) {
             valueDisplay.textContent = newIntensity.toFixed(1);
         }
         
-        // Réduire l'exposition pour plus de contraste en mode spot uniquement
+        // Réduire légèrement l'exposition pour plus de contraste en mode spot uniquement
         if (renderer) {
-            renderer.toneMappingExposure = 0.8;
+            renderer.toneMappingExposure = 1.8; // Légèrement réduit mais toujours très éclatant
         }
     } else {
         // Mode normal : rallumer la lumière ambiante et la lumière de remplissage
@@ -2616,9 +2745,9 @@ function toggleSpotOnlyMode(enabled) {
             updateLightIntensity(originalIntensity);
         }
         
-        // Restaurer l'exposition normale
+        // Restaurer l'exposition normale (très éclatante pour des couleurs vives)
         if (renderer) {
-            renderer.toneMappingExposure = 1.2;
+            renderer.toneMappingExposure = 2.2;
         }
     }
 }
