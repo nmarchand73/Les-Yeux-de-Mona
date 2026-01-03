@@ -1781,15 +1781,27 @@
                                 margin-bottom: 0;
                             }
                             #ai-info-content ul, #ai-info-content ol {
-                                margin: 0.25rem 0;
-                                padding-left: 1.5rem;
+                                margin: 0;
+                                padding-left: 0.85rem;
+                                list-style-position: outside;
                             }
                             #ai-info-content li {
-                                margin-bottom: 0.125rem;
-                                line-height: 1.4;
+                                margin: 0;
+                                line-height: 1.2;
+                                padding-left: 0.1rem;
                             }
                             #ai-info-content li:last-child {
                                 margin-bottom: 0;
+                            }
+                            #ai-info-content li + li {
+                                margin-top: 0.02rem;
+                            }
+                            #ai-info-content ul ul, #ai-info-content ol ol {
+                                margin: 0;
+                                padding-left: 0.65rem;
+                            }
+                            #ai-info-content ul:not(:last-child), #ai-info-content ol:not(:last-child) {
+                                margin-bottom: 0.1rem;
                             }
                             #ai-info-content strong {
                                 font-weight: 600;
@@ -1947,15 +1959,28 @@
                             margin-bottom: 0;
                         }
                         #ai-info-content ul, #ai-info-content ol, #ce-quil-faut-voir-content ul, #ce-quil-faut-voir-content ol {
-                            margin: 0.25rem 0;
-                            padding-left: 1.5rem;
+                            margin: 0;
+                            padding-left: 0.85rem;
+                            list-style-position: outside;
                         }
                         #ai-info-content li, #ce-quil-faut-voir-content li {
-                            margin-bottom: 0.125rem;
-                            line-height: 1.4;
+                            margin: 0;
+                            line-height: 1.2;
+                            padding-left: 0.1rem;
                         }
                         #ai-info-content li:last-child, #ce-quil-faut-voir-content li:last-child {
                             margin-bottom: 0;
+                        }
+                        #ai-info-content li + li, #ce-quil-faut-voir-content li + li {
+                            margin-top: 0.02rem;
+                        }
+                        #ai-info-content ul ul, #ai-info-content ol ol, #ce-quil-faut-voir-content ul ul, #ce-quil-faut-voir-content ol ol {
+                            margin: 0;
+                            padding-left: 0.65rem;
+                        }
+                        #ai-info-content ul:not(:last-child), #ai-info-content ol:not(:last-child),
+                        #ce-quil-faut-voir-content ul:not(:last-child), #ce-quil-faut-voir-content ol:not(:last-child) {
+                            margin-bottom: 0.1rem;
                         }
                         #ai-info-content strong, #ce-quil-faut-voir-content strong {
                             font-weight: 600;
@@ -2024,22 +2049,6 @@
                     `;
                     document.head.appendChild(style);
                 }
-                
-                // Mettre à jour le bouton
-                btn.disabled = false;
-                btn.innerHTML = '<span>✅</span><span>Informations disponibles</span>';
-                
-                // Ajouter un bouton pour régénérer
-                const regenerateBtn = document.createElement('button');
-                regenerateBtn.textContent = '🔄 Régénérer avec l\'IA';
-                regenerateBtn.style.cssText = 'margin-top: 1rem; padding: 0.5rem 1rem; background: var(--color-accent); color: white; border: none; border-radius: 4px; cursor: pointer;';
-                regenerateBtn.onclick = () => {
-                    if (regenerateBtn.parentNode) {
-                        regenerateBtn.parentNode.removeChild(regenerateBtn);
-                    }
-                    generateNewAIInfo(artwork);
-                };
-                content.appendChild(regenerateBtn);
             } else {
                 // Vérifier avec le backend si les informations existent
                 fetch(`/api/artwork/${artwork.id}/ai-info`)
